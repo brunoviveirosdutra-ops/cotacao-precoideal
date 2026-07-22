@@ -17,3 +17,29 @@ router.post("/login", adminLogin);
 
 
 export default router;
+
+router.get("/me", (req, res) => {
+
+    if (!req.session.admin) {
+        return res.status(401).json({
+            success: false
+        });
+    }
+
+    res.json({
+        success: true,
+        admin: req.session.admin
+    });
+
+});
+router.post("/logout", (req, res) => {
+
+    req.session.destroy(() => {
+
+        res.json({
+            success: true
+        });
+
+    });
+
+});

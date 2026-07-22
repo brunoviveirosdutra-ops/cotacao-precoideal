@@ -1,109 +1,33 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.getElementById("app").innerHTML = `
+<div class="layout">
 
-    const app = document.getElementById("app");
+    <aside class="sidebar">
+        ...
+    </aside>
 
-    app.innerHTML = `
-        <div class="container-fluid">
+    <main class="content">
 
-            <div class="row">
+        <header class="topbar">
 
-                <aside class="col-2 bg-dark text-white min-vh-100 p-3">
+            <h2 id="tituloPagina">Dashboard</h2>
 
-                    <h4 class="mb-4">
-                        Cotação
-                    </h4>
+            <div class="user">
 
-                    <ul class="nav flex-column">
+                <i class="fa-solid fa-user-circle"></i>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#">
-                                <i class="bi bi-speedometer2"></i>
-                                Dashboard
-                            </a>
-                        </li>
+                <span id="adminName">Carregando...</span>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#">
-                                <i class="bi bi-buildings"></i>
-                                Fornecedores
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#">
-                                <i class="bi bi-box-seam"></i>
-                                Produtos
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Cotações
-                            </a>
-                        </li>
-
-                    </ul>
-
-                </aside>
-
-                <main class="col-10">
-
-                    <div class="p-4">
-
-                        <h2>
-                            Dashboard
-                        </h2>
-
-                        <hr>
-
-                        <div class="row g-4">
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5>Fornecedores</h5>
-                                        <h2>0</h2>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5>Produtos</h5>
-                                        <h2>0</h2>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5>Cotações</h5>
-                                        <h2>0</h2>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5>Respostas</h5>
-                                        <h2>0</h2>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </main>
+                <button id="btnLogout" class="btn btn-danger btn-sm">
+                    Sair
+                </button>
 
             </div>
 
-        </div>
-    `;
+        </header>
 
-});
+        <section id="page-content"></section>
+
+    </main>
+
+</div>
+`;

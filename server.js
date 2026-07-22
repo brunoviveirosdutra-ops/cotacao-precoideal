@@ -7,6 +7,7 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
+import dashboardRoutes from "./routes/dashboard.js";
 
 dotenv.config();
 
@@ -67,6 +68,12 @@ app.use(
     "/api/auth",
     authRoutes
 );
+
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
+
 app.get("/", (req, res) => {
 
     res.send(`
@@ -75,7 +82,6 @@ app.get("/", (req, res) => {
     `);
 
 });
-
 
 // ============================
 // INICIAR SERVIDOR
