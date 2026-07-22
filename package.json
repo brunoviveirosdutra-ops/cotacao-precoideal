@@ -1,0 +1,13 @@
+{
+  "name": "cotacao-precoideal",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de cotações",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "Bruno Dutra",
+  "license": "MIT"
+}
