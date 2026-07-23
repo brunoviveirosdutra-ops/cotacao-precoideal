@@ -1,22 +1,22 @@
 import { getDatabase } from "../database/database.js";
 
 // ======================================================
-// LISTAR PRODUTOS
+// LISTAR FORNECEDORES
 // ======================================================
 
-export const getProducts = async (req, res) => {
+export const getSuppliers = async (req, res) => {
 
     try {
 
         const db = await getDatabase();
 
-        const products = await db.all(`
+        const suppliers = await db.all(`
             SELECT *
-            FROM products
-            ORDER BY name
+            FROM suppliers
+            ORDER BY company_name
         `);
 
-        res.json(products);
+        res.json(suppliers);
 
     } catch (error) {
 
@@ -24,7 +24,7 @@ export const getProducts = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Erro ao listar produtos."
+            message: "Erro ao listar fornecedores."
         });
 
     }
@@ -32,30 +32,30 @@ export const getProducts = async (req, res) => {
 };
 
 // ======================================================
-// BUSCAR PRODUTO
+// BUSCAR FORNECEDOR
 // ======================================================
 
-export const getProductById = async (req, res) => {
+export const getSupplierById = async (req, res) => {
 
     try {
 
         const db = await getDatabase();
 
-        const product = await db.get(
-            "SELECT * FROM products WHERE id=?",
+        const supplier = await db.get(
+            "SELECT * FROM suppliers WHERE id = ?",
             [req.params.id]
         );
 
-        if (!product) {
+        if (!supplier) {
 
             return res.status(404).json({
                 success: false,
-                message: "Produto não encontrado."
+                message: "Fornecedor não encontrado."
             });
 
         }
 
-        res.json(product);
+        res.json(supplier);
 
     } catch (error) {
 
@@ -63,7 +63,7 @@ export const getProductById = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Erro ao buscar produto."
+            message: "Erro ao buscar fornecedor."
         });
 
     }
@@ -71,55 +71,51 @@ export const getProductById = async (req, res) => {
 };
 
 // ======================================================
-// CADASTRAR PRODUTO
+// CADASTRAR FORNECEDOR
 // ======================================================
 
-export const createProduct = async (req, res) => {
+export const createSupplier = async (req, res) => {
 
     try {
 
         const db = await getDatabase();
 
         const {
-
-            name,
-            category,
-            unit,
-            description
-
+            company_name,
+            cnpj,
+            contact_name,
+            email,
+            phone,
+            password
         } = req.body;
 
         const result = await db.run(
-
             `
-            INSERT INTO products
+            INSERT INTO suppliers
             (
-                name,
-                category,
-                unit,
-                description
+                company_name,
+                cnpj,
+                contact_name,
+                email,
+                phone,
+                password
             )
             VALUES
-            (
-                ?, ?, ?, ?
-            )
+            (?, ?, ?, ?, ?, ?)
             `,
-
             [
-                name,
-                category,
-                unit,
-                description
+                company_name,
+                cnpj,
+                contact_name,
+                email,
+                phone,
+                password
             ]
-
         );
 
-        res.json({
-
+        res.status(201).json({
             success: true,
-
             id: result.lastID
-
         });
 
     } catch (error) {
@@ -127,11 +123,8 @@ export const createProduct = async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-
             success: false,
-
-            message: "Erro ao cadastrar produto."
-
+            message: "Erro ao cadastrar fornecedor."
         });
 
     }
@@ -139,27 +132,23 @@ export const createProduct = async (req, res) => {
 };
 
 // ======================================================
-// EXCLUIR
+// EXCLUIR FORNECEDOR
 // ======================================================
 
-export const deleteProduct = async (req, res) => {
+export const deleteSupplier = async (req, res) => {
 
     try {
 
         const db = await getDatabase();
 
         await db.run(
-
-            "DELETE FROM products WHERE id=?",
-
+            "DELETE FROM suppliers WHERE id = ?",
             [req.params.id]
-
         );
 
         res.json({
-
-            success: true
-
+            success: true,
+            message: "Fornecedor excluído."
         });
 
     } catch (error) {
@@ -167,9 +156,8 @@ export const deleteProduct = async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-
-            success: false
-
+            success: false,
+            message: "Erro ao excluir fornecedor."
         });
 
     }

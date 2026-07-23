@@ -9,6 +9,9 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import quotesRoutes from "./routes/quotes.js";
+import productsRoutes from "./routes/products.js";
+import suppliersRoutes from "./routes/suppliers.js";
+import "./database/init.js";
 
 dotenv.config();
 
@@ -93,6 +96,15 @@ app.use(
     quotesRoutes
 );
 
+app.use("/api/auth", authRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/quotes", quotesRoutes);
+
+app.use("/api/products", productsRoutes);
+
+app.use("/api/suppliers", suppliersRoutes);
 // ============================
 // INICIAR SERVIDOR
 // ============================
