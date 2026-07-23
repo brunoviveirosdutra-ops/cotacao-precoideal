@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import quotesRoutes from "./routes/quotes.js";
 
 dotenv.config();
 
@@ -24,7 +25,11 @@ const __dirname = path.dirname(__filename);
 // MIDDLEWARES
 // ============================
 
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: false
+    })
+);
 
 app.use(cors());
 
@@ -82,6 +87,11 @@ app.get("/", (req, res) => {
     `);
 
 });
+
+app.use(
+    "/api/quotes",
+    quotesRoutes
+);
 
 // ============================
 // INICIAR SERVIDOR

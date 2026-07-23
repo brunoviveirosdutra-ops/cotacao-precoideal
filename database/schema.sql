@@ -1,3 +1,9 @@
+PRAGMA foreign_keys = ON;
+
+-- =====================================================
+-- TABELA DE ADMINISTRADORES
+-- =====================================================
+
 CREATE TABLE IF NOT EXISTS admins (
 
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,7 +18,9 @@ CREATE TABLE IF NOT EXISTS admins (
 
 );
 
-
+-- =====================================================
+-- TABELA DE FORNECEDORES
+-- =====================================================
 
 CREATE TABLE IF NOT EXISTS suppliers (
 
@@ -24,11 +32,11 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
     contact_name TEXT,
 
-    email TEXT UNIQUE,
+    email TEXT UNIQUE NOT NULL,
 
     phone TEXT,
 
-    password TEXT,
+    password TEXT NOT NULL,
 
     status TEXT DEFAULT 'active',
 
@@ -36,7 +44,9 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
 );
 
-
+-- =====================================================
+-- TABELA DE PRODUTOS
+-- =====================================================
 
 CREATE TABLE IF NOT EXISTS products (
 
@@ -56,7 +66,9 @@ CREATE TABLE IF NOT EXISTS products (
 
 );
 
-
+-- =====================================================
+-- TABELA DE COTAÇÕES
+-- =====================================================
 
 CREATE TABLE IF NOT EXISTS quotes (
 
@@ -64,15 +76,23 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     title TEXT NOT NULL,
 
-    deadline DATETIME,
+    description TEXT,
+
+    deadline DATETIME NOT NULL,
 
     status TEXT DEFAULT 'open',
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_by INTEGER,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (created_by) REFERENCES admins(id)
 
 );
 
-
+-- =====================================================
+-- PRODUTOS DA COTAÇÃO
+-- =====================================================
 
 CREATE TABLE IF NOT EXISTS quote_items (
 
@@ -84,13 +104,45 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     quantity REAL NOT NULL,
 
-    FOREIGN KEY(quote_id) REFERENCES quotes(id),
+    FOREIGN KEY (quote_id)
+        REFERENCES quotes(id)
+        ON DELETE CASCADE,
 
-    FOREIGN KEY(product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id)
+        REFERENCES products(id)
 
 );
 
+-- =====================================================
+-- FORNECEDORES PARTICIPANTES
+-- =====================================================
 
+CREATE TABLE IF NOT EXISTS quote_suppliers (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    quote_id INTEGER NOT NULL,
+
+    supplier_id INTEGER NOT NULL,
+
+    viewed INTEGER DEFAULT 0,
+
+    answered INTEGER DEFAULT 0,
+
+    answer_date DATETIME,
+
+    FOREIGN KEY (quote_id)
+        REFERENCES quotes(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+
+);
+
+-- =====================================================
+-- RESPOSTAS DOS FORNECEDORES
+-- =====================================================
 
 CREATE TABLE IF NOT EXISTS supplier_answers (
 
@@ -106,9 +158,36 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+    FOREIGN KEY (quote_item_id)
+        REFERENCES quote_items(id)
+        ON DELETE CASCADE,
 
-    FOREIGN KEY(quote_item_id) REFERENCES quote_items(id),
-
-    FOREIGN KEY(supplier_id) REFERENCES suppliers(id)
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
 
 );
+
+-- =====================================================
+-- ÍNDICES
+-- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_quotes_status
+ON quotes(status);
+
+CREATE INDEX IF NOT EXISTS idx_quote_items_quote
+ON quote_items(quote_id);
+
+CREATE INDEX IF NOT EXISTS idx_quote_items_product
+ON quote_items(product_id);
+
+CREATE INDEX IF NOT EXISTS idx_quote_suppliers_quote
+ON quote_suppliers(quote_id);
+
+CREATE INDEX IF NOT EXISTS idx_quote_suppliers_supplier
+ON quote_suppliers(supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_answers_supplier
+ON supplier_answers(supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_answers_item
+ON supplier_answers(quote_item_id);

@@ -1,2 +1,208 @@
-<h3>Em desenvolvimento...</h3>
-<p>Esta página será implementada na próxima sprint.</p>
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h3>Cotações</h3>
+
+        <button
+            class="btn btn-primary"
+            id="btnNovaCotacao">
+
+            <i class="fa-solid fa-plus"></i>
+
+            Nova Cotação
+
+        </button>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Título</th>
+
+                        <th>Prazo</th>
+
+                        <th>Status</th>
+
+                        <th>Produtos</th>
+
+                        <th>Fornecedores</th>
+
+                        <th width="180">Ações</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="quotesTable">
+
+                    <tr>
+
+                        <td colspan="7" class="text-center">
+
+                            Nenhuma cotação encontrada.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal fade" id="quoteModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Nova Cotação
+
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <form id="quoteForm">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Título
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="title"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Descrição
+
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="3">
+                        </textarea>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Data Limite
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="deadline"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <hr>
+
+                    <h5>
+
+                        Produtos
+
+                    </h5>
+
+                    <div id="productsContainer">
+
+                        <p class="text-muted">
+
+                            (Na próxima etapa vamos adicionar os produtos.)
+
+                        </p>
+
+                    </div>
+
+                    <hr>
+
+                    <h5>
+
+                        Fornecedores
+
+                    </h5>
+
+                    <div id="suppliersContainer">
+
+                        <p class="text-muted">
+
+                            (Na próxima etapa vamos carregar os fornecedores.)
+
+                        </p>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    class="btn btn-success"
+                    id="btnSalvarCotacao">
+
+                    Salvar Cotação
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
