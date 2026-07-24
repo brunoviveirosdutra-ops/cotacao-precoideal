@@ -3,110 +3,220 @@
 // public/admin/js/cotacoes.js
 // ======================================================
 
-var quoteModal = null;
 
-// Inicializa imediatamente quando o script é carregado
+let quoteModal = null;
+
+
+// Iniciar módulo
+
 iniciarCotacoes();
+
+
 
 async function iniciarCotacoes() {
 
+
     configurarModal();
+
 
     configurarEventos();
 
+
     await carregarCotacoes();
 
-    console.log("✅ Módulo de Cotações carregado.");
+
+    console.log(
+        "✅ Módulo de Cotações carregado."
+    );
+
 
 }
+
+
 
 // ======================================================
 // MODAL
 // ======================================================
 
+
 function configurarModal() {
 
-    const modal = document.getElementById("quoteModal");
+
+    const modal =
+        document.getElementById(
+            "quoteModal"
+        );
+
 
     if (modal) {
 
-        quoteModal = new bootstrap.Modal(modal);
+
+        quoteModal =
+            new bootstrap.Modal(modal);
+
 
     }
 
+
 }
+
+
 
 // ======================================================
 // EVENTOS
 // ======================================================
 
+
 function configurarEventos() {
 
-    const btnNova = document.getElementById("btnNovaCotacao");
+
+    const btnNova =
+        document.getElementById(
+            "btnNovaCotacao"
+        );
+
+
 
     if (btnNova) {
 
-        btnNova.addEventListener("click", () => {
 
-            limparFormulario();
+        btnNova.addEventListener(
+            "click",
+            async () => {
 
-            quoteModal.show();
 
-        });
+                limparFormulario();
+
+
+                await carregarProdutos();
+
+
+                await carregarFornecedores();
+
+
+                quoteModal.show();
+
+
+            }
+
+        );
+
 
     }
 
-    const btnSalvar = document.getElementById("btnSalvarCotacao");
+
+
+
+    const btnSalvar =
+        document.getElementById(
+            "btnSalvarCotacao"
+        );
+
+
 
     if (btnSalvar) {
 
-        btnSalvar.addEventListener("click", salvarCotacao);
+
+        btnSalvar.addEventListener(
+            "click",
+            salvarCotacao
+        );
+
 
     }
 
+
 }
+
+
 
 // ======================================================
 // LISTAR COTAÇÕES
 // ======================================================
 
+
 async function carregarCotacoes() {
+
 
     try {
 
-        const response = await fetch("/api/quotes");
 
-        const quotes = await response.json();
+        const response =
+            await fetch(
+                "/api/quotes"
+            );
 
-        const tbody = document.getElementById("quotesTable");
+
+        const quotes =
+            await response.json();
+
+
+
+        const tbody =
+            document.getElementById(
+                "quotesTable"
+            );
+
+
+
+        if (!tbody)
+            return;
+
+
 
         tbody.innerHTML = "";
 
+
+
         if (!quotes.length) {
 
+
             tbody.innerHTML = `
+
                 <tr>
-                    <td colspan="7" class="text-center">
+
+                    <td colspan="7"
+                        class="text-center">
+
                         Nenhuma cotação encontrada.
+
                     </td>
+
                 </tr>
+
             `;
+
 
             return;
 
+
         }
+
+
+
+
 
         quotes.forEach(q => {
 
+
+
             tbody.innerHTML += `
+
 
                 <tr>
 
+
                     <td>${q.id}</td>
+
 
                     <td>${q.title}</td>
 
-                    <td>${formatarData(q.deadline)}</td>
+
+                    <td>
+                        ${formatarData(q.deadline)}
+                    </td>
+
+
 
                     <td>
 
@@ -116,13 +226,29 @@ async function carregarCotacoes() {
 
                         </span>
 
+
                     </td>
 
-                    <td>${q.total_products}</td>
 
-                    <td>${q.total_suppliers}</td>
 
                     <td>
+
+                        ${q.total_products}
+
+                    </td>
+
+
+
+                    <td>
+
+                        ${q.total_suppliers}
+
+                    </td>
+
+
+
+                    <td>
+
 
                         <button
                             class="btn btn-sm btn-warning">
@@ -130,6 +256,8 @@ async function carregarCotacoes() {
                             Editar
 
                         </button>
+
+
 
                         <button
                             class="btn btn-sm btn-danger"
@@ -139,128 +267,534 @@ async function carregarCotacoes() {
 
                         </button>
 
+
+
                     </td>
+
 
                 </tr>
 
+
             `;
+
+
 
         });
 
-    } catch (erro) {
 
-        console.error(erro);
+
+    } catch(error) {
+
+
+        console.error(error);
+
 
     }
+
 
 }
 
+
+
+
+
 // ======================================================
-// SALVAR
+// CARREGAR PRODUTOS
 // ======================================================
 
-async function salvarCotacao() {
 
-    const dados = {
+async function carregarProdutos() {
 
-        title: document.getElementById("title").value,
 
-        description: document.getElementById("description").value,
+    const container =
+        document.getElementById(
+            "productsContainer"
+        );
 
-        deadline: document.getElementById("deadline").value
 
-    };
-
-    if (!dados.title || !dados.deadline) {
-
-        alert("Preencha os campos obrigatórios.");
-
-        return;
-
-    }
 
     try {
 
-        const response = await fetch("/api/quotes", {
 
-            method: "POST",
+        const response =
+            await fetch(
+                "/api/products"
+            );
 
-            headers: {
 
-                "Content-Type": "application/json"
 
-            },
+        const products =
+            await response.json();
 
-            body: JSON.stringify(dados)
+
+
+        container.innerHTML = "";
+
+
+
+        products.forEach(product => {
+
+
+
+            container.innerHTML += `
+
+
+                <div class="border rounded p-2 mb-2">
+
+
+                    <div class="form-check">
+
+
+                        <input
+
+                            class="form-check-input product-check"
+
+                            type="checkbox"
+
+                            value="${product.id}"
+
+                            id="product_${product.id}"
+
+                        >
+
+
+
+                        <label
+
+                            class="form-check-label"
+
+                            for="product_${product.id}">
+
+                            ${product.name}
+
+                        </label>
+
+
+
+                    </div>
+
+
+
+
+                    <input
+
+                        type="number"
+
+                        class="form-control mt-2 product-qty"
+
+                        data-product="${product.id}"
+
+                        placeholder="Quantidade"
+
+                        min="1"
+
+                    >
+
+
+
+                </div>
+
+
+            `;
+
 
         });
 
-        const json = await response.json();
 
-        if (!response.ok) {
 
-            alert(json.message);
+    } catch(error) {
 
-            return;
 
-        }
+        console.error(error);
 
-        quoteModal.hide();
 
-        limparFormulario();
+        container.innerHTML =
+            "Erro ao carregar produtos.";
 
-        carregarCotacoes();
-
-    } catch (erro) {
-
-        console.error(erro);
 
     }
 
+
 }
+
+
+
+
+
+// ======================================================
+// CARREGAR FORNECEDORES
+// ======================================================
+
+
+async function carregarFornecedores() {
+
+
+    const container =
+        document.getElementById(
+            "suppliersContainer"
+        );
+
+
+
+    try {
+
+
+
+        const response =
+            await fetch(
+                "/api/suppliers"
+            );
+
+
+
+        const suppliers =
+            await response.json();
+
+
+
+        container.innerHTML = "";
+
+
+
+        suppliers.forEach(supplier => {
+
+
+
+            container.innerHTML += `
+
+
+                <div class="form-check">
+
+
+                    <input
+
+                        class="form-check-input supplier-check"
+
+                        type="checkbox"
+
+                        value="${supplier.id}"
+
+                        id="supplier_${supplier.id}"
+
+                    >
+
+
+
+                    <label
+
+                        class="form-check-label"
+
+                        for="supplier_${supplier.id}">
+
+                        ${supplier.company_name}
+
+                    </label>
+
+
+
+                </div>
+
+
+            `;
+
+
+
+        });
+
+
+
+    } catch(error) {
+
+
+        console.error(error);
+
+
+        container.innerHTML =
+            "Erro ao carregar fornecedores.";
+
+
+    }
+
+
+}
+
+
+
+
+
+// ======================================================
+// SALVAR COTAÇÃO
+// ======================================================
+
+
+async function salvarCotacao() {
+
+
+    const products = [];
+
+
+
+    document
+        .querySelectorAll(".product-check:checked")
+        .forEach(item => {
+
+
+
+            const quantity =
+                document.querySelector(
+                    `.product-qty[data-product="${item.value}"]`
+                ).value;
+
+
+
+            products.push({
+
+                product_id:
+                    Number(item.value),
+
+                quantity:
+                    Number(quantity || 0)
+
+            });
+
+
+
+        });
+
+
+
+
+    const suppliers = [];
+
+
+    document
+        .querySelectorAll(".supplier-check:checked")
+        .forEach(item => {
+
+
+            suppliers.push(
+                Number(item.value)
+            );
+
+
+        });
+
+
+
+
+
+    const dados = {
+
+
+        title:
+            document.getElementById("title").value,
+
+
+        description:
+            document.getElementById("description").value,
+
+
+        deadline:
+            document.getElementById("deadline").value,
+
+
+        products,
+
+
+        suppliers
+
+
+    };
+
+
+
+
+
+    if (!dados.title || !dados.deadline) {
+
+
+        alert(
+            "Preencha título e prazo."
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+    try {
+
+
+
+        const response =
+            await fetch(
+                "/api/quotes",
+                {
+
+                    method:
+                        "POST",
+
+                    headers:
+                    {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+
+                    body:
+                        JSON.stringify(dados)
+
+                }
+
+            );
+
+
+
+
+        const result =
+            await response.json();
+
+
+
+
+
+        if (!response.ok) {
+
+
+            alert(
+                result.message
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        quoteModal.hide();
+
+
+        limparFormulario();
+
+
+        await carregarCotacoes();
+
+
+
+
+        alert(
+            "Cotação criada com sucesso!"
+        );
+
+
+
+    } catch(error) {
+
+
+        console.error(error);
+
+
+    }
+
+
+
+}
+
+
+
+
 
 // ======================================================
 // EXCLUIR
 // ======================================================
 
+
 async function excluirCotacao(id) {
 
-    if (!confirm("Deseja excluir esta cotação?")) {
 
+    if(
+        !confirm(
+            "Deseja excluir esta cotação?"
+        )
+    )
         return;
 
-    }
 
-    await fetch(`/api/quotes/${id}`, {
 
-        method: "DELETE"
+    await fetch(
+        `/api/quotes/${id}`,
+        {
 
-    });
+            method:
+                "DELETE"
+
+        }
+    );
+
+
 
     carregarCotacoes();
 
+
+
 }
 
-window.excluirCotacao = excluirCotacao;
+
+
+window.excluirCotacao =
+    excluirCotacao;
+
+
+
+
 
 // ======================================================
-// LIMPAR
+// LIMPAR FORMULÁRIO
 // ======================================================
+
 
 function limparFormulario() {
 
-    document.getElementById("quoteForm").reset();
+
+    document
+        .getElementById(
+            "quoteForm"
+        )
+        .reset();
+
+
 
 }
+
+
 
 // ======================================================
 // DATA
 // ======================================================
 
+
 function formatarData(data) {
 
-    if (!data) return "-";
 
-    return new Date(data).toLocaleDateString("pt-BR");
+    if(!data)
+        return "-";
+
+
+    return new Date(data)
+        .toLocaleDateString(
+            "pt-BR"
+        );
+
 
 }

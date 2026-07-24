@@ -1,2 +1,169 @@
-<h3>Em desenvolvimento...</h3>
-<p>Esta página será implementada na próxima sprint.</p>
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h3>Produtos</h3>
+
+        <button 
+            class="btn btn-primary"
+            id="btnNovoProduto">
+
+            <i class="fa-solid fa-plus"></i>
+            Novo Produto
+
+        </button>
+
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Unidade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="productsTable">
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+                            Nenhum produto cadastrado.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- MODAL PRODUTO -->
+
+<div class="modal fade" id="productModal">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Novo Produto
+                </h5>
+
+                <button 
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+
+                <input 
+                    id="productName"
+                    class="form-control mb-3"
+                    placeholder="Nome do produto">
+
+
+                <select 
+                    id="productCategory"
+                    class="form-control mb-3">
+
+
+                    <option value="carne">
+                        Carne
+                    </option>
+
+                    <option value="frango">
+                        Frango
+                    </option>
+
+
+                </select>
+
+
+
+                <select 
+                    id="productUnit"
+                    class="form-control">
+
+
+                    <option value="kg">
+                        KG
+                    </option>
+
+                    <option value="un">
+                        Unidade
+                    </option>
+
+                    <option value="caixa">
+                        Caixa
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+
+            <div class="modal-footer">
+
+
+                <button 
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+
+                <button 
+                    class="btn btn-success"
+                    id="btnSalvarProduto">
+
+                    Salvar
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

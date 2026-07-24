@@ -1,5 +1,6 @@
 import { getDatabase } from "../database/database.js";
 
+
 // ======================================================
 // LISTAR TODAS AS COTAÇÕES
 // ======================================================
@@ -26,6 +27,7 @@ export const getQuotes = async (req, res) => {
 
         res.json(quotes);
 
+
     } catch (error) {
 
         console.error(error);
@@ -39,6 +41,8 @@ export const getQuotes = async (req, res) => {
 
 };
 
+
+
 // ======================================================
 // BUSCAR COTAÇÃO POR ID
 // ======================================================
@@ -51,10 +55,16 @@ export const getQuoteById = async (req, res) => {
 
         const { id } = req.params;
 
+
         const quote = await db.get(
-            "SELECT * FROM quotes WHERE id = ?",
+            `
+            SELECT *
+            FROM quotes
+            WHERE id = ?
+            `,
             [id]
         );
+
 
         if (!quote) {
 
@@ -65,7 +75,47 @@ export const getQuoteById = async (req, res) => {
 
         }
 
-        res.json(quote);
+
+        const products = await db.all(
+            `
+            SELECT
+                qi.*,
+                p.name,
+                p.unit
+            FROM quote_items qi
+            INNER JOIN products p
+                ON p.id = qi.product_id
+            WHERE qi.quote_id = ?
+            `,
+            [id]
+        );
+
+
+        const suppliers = await db.all(
+            `
+            SELECT
+                qs.*,
+                s.company_name,
+                s.email
+            FROM quote_suppliers qs
+            INNER JOIN suppliers s
+                ON s.id = qs.supplier_id
+            WHERE qs.quote_id = ?
+            `,
+            [id]
+        );
+
+
+        res.json({
+
+            ...quote,
+
+            products,
+
+            suppliers
+
+        });
+
 
     } catch (error) {
 
@@ -80,32 +130,55 @@ export const getQuoteById = async (req, res) => {
 
 };
 
+
+
 // ======================================================
-// CRIAR COTAÇÃO
+// CRIAR COTAÇÃO COMPLETA
 // ======================================================
 
 export const createQuote = async (req, res) => {
 
+    const db = await getDatabase();
+
+
     try {
 
-        const db = await getDatabase();
 
         const {
             title,
             description,
-            deadline
+            deadline,
+            products,
+            suppliers
         } = req.body;
+
+
 
         if (!title || !deadline) {
 
             return res.status(400).json({
+
                 success: false,
-                message: "Título e prazo são obrigatórios."
+
+                message:
+                    "Título e prazo são obrigatórios."
+
             });
 
         }
 
+
+
+        await db.run(
+            "BEGIN TRANSACTION"
+        );
+
+
+
+        // Criar cotação
+
         const result = await db.run(
+
             `
             INSERT INTO quotes
             (
@@ -119,31 +192,153 @@ export const createQuote = async (req, res) => {
                 ?, ?, ?, 'open'
             )
             `,
+
             [
                 title,
                 description || "",
                 deadline
             ]
+
         );
 
+
+
+        const quoteId = result.lastID;
+
+
+
+        // Inserir produtos
+
+        if (
+            Array.isArray(products)
+        ) {
+
+
+            for (const product of products) {
+
+
+                await db.run(
+
+                    `
+                    INSERT INTO quote_items
+                    (
+                        quote_id,
+                        product_id,
+                        quantity
+                    )
+                    VALUES
+                    (
+                        ?, ?, ?
+                    )
+                    `,
+
+                    [
+
+                        quoteId,
+
+                        product.product_id,
+
+                        product.quantity
+
+                    ]
+
+                );
+
+
+            }
+
+        }
+
+
+
+        // Inserir fornecedores
+
+        if (
+            Array.isArray(suppliers)
+        ) {
+
+
+            for (const supplierId of suppliers) {
+
+
+                await db.run(
+
+                    `
+                    INSERT INTO quote_suppliers
+                    (
+                        quote_id,
+                        supplier_id
+                    )
+                    VALUES
+                    (
+                        ?, ?
+                    )
+                    `,
+
+                    [
+
+                        quoteId,
+
+                        supplierId
+
+                    ]
+
+                );
+
+
+            }
+
+        }
+
+
+
+        await db.run(
+            "COMMIT"
+        );
+
+
+
         res.status(201).json({
+
             success: true,
-            id: result.lastID,
-            message: "Cotação criada com sucesso."
+
+            id: quoteId,
+
+            message:
+                "Cotação criada com sucesso."
+
         });
+
+
 
     } catch (error) {
 
+
         console.error(error);
 
+
+
+        await db.run(
+            "ROLLBACK"
+        );
+
+
+
         res.status(500).json({
+
             success: false,
-            message: "Erro ao criar cotação."
+
+            message:
+                "Erro ao criar cotação."
+
         });
+
 
     }
 
 };
+
+
 
 // ======================================================
 // ATUALIZAR COTAÇÃO
@@ -157,6 +352,7 @@ export const updateQuote = async (req, res) => {
 
         const { id } = req.params;
 
+
         const {
             title,
             description,
@@ -164,7 +360,10 @@ export const updateQuote = async (req, res) => {
             status
         } = req.body;
 
+
+
         await db.run(
+
             `
             UPDATE quotes
             SET
@@ -174,6 +373,7 @@ export const updateQuote = async (req, res) => {
                 status = ?
             WHERE id = ?
             `,
+
             [
                 title,
                 description,
@@ -181,25 +381,41 @@ export const updateQuote = async (req, res) => {
                 status,
                 id
             ]
+
         );
 
+
         res.json({
+
             success: true,
-            message: "Cotação atualizada."
+
+            message:
+                "Cotação atualizada."
+
         });
+
 
     } catch (error) {
 
+
         console.error(error);
 
+
         res.status(500).json({
+
             success: false,
-            message: "Erro ao atualizar."
+
+            message:
+                "Erro ao atualizar."
+
         });
+
 
     }
 
 };
+
+
 
 // ======================================================
 // EXCLUIR COTAÇÃO
@@ -213,24 +429,41 @@ export const deleteQuote = async (req, res) => {
 
         const { id } = req.params;
 
+
         await db.run(
+
             "DELETE FROM quotes WHERE id = ?",
+
             [id]
+
         );
 
+
         res.json({
+
             success: true,
-            message: "Cotação excluída."
+
+            message:
+                "Cotação excluída."
+
         });
+
 
     } catch (error) {
 
+
         console.error(error);
 
+
         res.status(500).json({
+
             success: false,
-            message: "Erro ao excluir."
+
+            message:
+                "Erro ao excluir."
+
         });
+
 
     }
 

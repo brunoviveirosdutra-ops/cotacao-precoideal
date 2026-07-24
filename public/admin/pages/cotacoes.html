@@ -1,8 +1,11 @@
 <div class="container-fluid">
 
+
     <div class="d-flex justify-content-between align-items-center mb-4">
 
+
         <h3>Cotações</h3>
+
 
         <button
             class="btn btn-primary"
@@ -14,15 +17,22 @@
 
         </button>
 
+
     </div>
+
+
 
     <div class="card shadow-sm">
 
+
         <div class="card-body">
+
 
             <table class="table table-hover align-middle">
 
+
                 <thead>
+
 
                     <tr>
 
@@ -38,13 +48,19 @@
 
                         <th>Fornecedores</th>
 
-                        <th width="180">Ações</th>
+                        <th width="180">
+                            Ações
+                        </th>
 
                     </tr>
 
+
                 </thead>
 
+
+
                 <tbody id="quotesTable">
+
 
                     <tr>
 
@@ -56,25 +72,46 @@
 
                     </tr>
 
+
                 </tbody>
+
 
             </table>
 
+
         </div>
+
 
     </div>
 
+
+
 </div>
 
-<!-- MODAL -->
 
-<div class="modal fade" id="quoteModal" tabindex="-1">
+
+
+
+<!-- ======================================================
+MODAL NOVA COTAÇÃO
+====================================================== -->
+
+
+<div 
+    class="modal fade"
+    id="quoteModal"
+    tabindex="-1">
+
 
     <div class="modal-dialog modal-lg">
 
+
         <div class="modal-content">
 
+
+
             <div class="modal-header">
+
 
                 <h5 class="modal-title">
 
@@ -82,18 +119,29 @@
 
                 </h5>
 
+
                 <button
                     class="btn-close"
                     data-bs-dismiss="modal">
+
                 </button>
+
 
             </div>
 
+
+
+
+
             <div class="modal-body">
+
 
                 <form id="quoteForm">
 
+
+
                     <div class="mb-3">
+
 
                         <label class="form-label">
 
@@ -101,15 +149,28 @@
 
                         </label>
 
+
                         <input
+
                             type="text"
+
                             id="title"
+
                             class="form-control"
-                            required>
+
+                            required
+
+                        >
+
 
                     </div>
 
+
+
+
+
                     <div class="mb-3">
+
 
                         <label class="form-label">
 
@@ -117,15 +178,26 @@
 
                         </label>
 
+
                         <textarea
+
                             id="description"
+
                             class="form-control"
+
                             rows="3">
+
                         </textarea>
+
 
                     </div>
 
+
+
+
+
                     <div class="mb-3">
+
 
                         <label class="form-label">
 
@@ -133,15 +205,32 @@
 
                         </label>
 
+
                         <input
+
                             type="date"
+
                             id="deadline"
+
                             class="form-control"
-                            required>
+
+                            required
+
+                        >
+
 
                     </div>
 
+
+
+
+
                     <hr>
+
+
+
+                    <!-- PRODUTOS -->
+
 
                     <h5>
 
@@ -149,17 +238,32 @@
 
                     </h5>
 
+
+
                     <div id="productsContainer">
+
 
                         <p class="text-muted">
 
-                            (Na próxima etapa vamos adicionar os produtos.)
+                            Carregando produtos...
 
                         </p>
 
+
                     </div>
 
+
+
+
+
                     <hr>
+
+
+
+
+
+                    <!-- FORNECEDORES -->
+
 
                     <h5>
 
@@ -167,42 +271,68 @@
 
                     </h5>
 
+
+
                     <div id="suppliersContainer">
+
 
                         <p class="text-muted">
 
-                            (Na próxima etapa vamos carregar os fornecedores.)
+                            Carregando fornecedores...
 
                         </p>
 
+
                     </div>
+
+
 
                 </form>
 
+
+
             </div>
+
+
+
+
 
             <div class="modal-footer">
 
+
                 <button
+
                     class="btn btn-secondary"
+
                     data-bs-dismiss="modal">
 
                     Cancelar
 
                 </button>
 
+
+
+
                 <button
+
                     class="btn btn-success"
+
                     id="btnSalvarCotacao">
 
                     Salvar Cotação
 
                 </button>
 
+
+
             </div>
+
+
 
         </div>
 
+
     </div>
+
 
 </div>
