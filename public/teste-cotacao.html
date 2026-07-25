@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Cotação</title>
+</head>
+
+<body>
+
+<h2>Criar Cotação Teste</h2>
+
+<button onclick="criarCotacao()">
+Criar Cotação
+</button>
+
+<pre id="resultado"></pre>
+
+
+<script>
+
+async function criarCotacao(){
+
+    const resposta = await fetch("/api/quotations", {
+
+        method: "POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body: JSON.stringify({
+
+            title:"Cotação Teste Carne",
+
+            description:"Compra semanal",
+
+            deadline:"2026-07-30"
+
+        })
+
+    });
+
+
+    const dados = await resposta.json();
+
+    document.getElementById("resultado").textContent =
+        JSON.stringify(dados,null,2);
+
+}
+
+</script>
+
+</body>
+</html>

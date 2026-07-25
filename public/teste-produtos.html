@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<title>Cadastro Produtos</title>
+</head>
+
+<body>
+
+<h1>Produtos de Teste</h1>
+
+<button onclick="cadastrarProdutos()">
+Cadastrar Produtos
+</button>
+
+<pre id="resultado"></pre>
+
+
+<script>
+
+async function cadastrarProdutos(){
+
+    const produtos = [
+
+        {
+            name:"Acém",
+            category:"carne",
+            unit:"kg",
+            description:"Carne bovina"
+        },
+
+        {
+            name:"Patinho",
+            category:"carne",
+            unit:"kg",
+            description:"Carne bovina"
+        },
+
+        {
+            name:"Alcatra",
+            category:"carne",
+            unit:"kg",
+            description:"Carne bovina"
+        },
+
+        {
+            name:"Filé de Frango",
+            category:"frango",
+            unit:"kg",
+            description:"Frango sem osso"
+        },
+
+        {
+            name:"Coxa e Sobrecoxa",
+            category:"frango",
+            unit:"kg",
+            description:"Corte de frango"
+        }
+
+    ];
+
+
+    let retorno = [];
+
+
+    for(const produto of produtos){
+
+        const resposta = await fetch("/api/products", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(produto)
+
+        });
+
+
+        retorno.push(await resposta.json());
+
+    }
+
+
+    document.getElementById("resultado").textContent =
+        JSON.stringify(retorno,null,2);
+
+}
+
+</script>
+
+</body>
+
+</html>
