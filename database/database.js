@@ -6,25 +6,41 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const databasePath = path.join(__dirname, "cotacao.db");
 
-const databasePath = path.join(
-    __dirname,
-    "cotacao.db"
-);
+// Mantém uma única conexão durante toda a execução
+let database = null;
 
+export async function getDatabase() {
 
-export async function getDatabase(){
+    if (database) {
+        return database;
+    }
 
-    const db = await open({
-        filename: databasePath,
-        driver: sqlite3.Database
-    });
+    try {
 
+        database = await open({
+            filename: databasePath,
+            driver: sqlite3.Database
+        });
 
-    await db.exec(`
-        PRAGMA foreign_keys = ON;
-    `);
+        await database.exec(`
+            PRAGMA foreign_keys = ON;
+            PRAGMA journal_mode = WAL;
+            PRAGMA synchronous = NORMAL;
+        `);
 
+        console.log(`✅ Banco SQLite conectado: ${databasePath}`);
 
-    return db;
+        return database;
+
+    } catch (error) {
+
+        console.error("❌ Erro ao conectar ao banco de dados.");
+        console.error(error);
+
+        throw error;
+
+    }
+
 }

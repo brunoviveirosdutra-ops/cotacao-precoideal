@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS admins (
 
     name TEXT NOT NULL,
 
-    email TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL UNIQUE,
 
     password TEXT NOT NULL,
 
@@ -32,13 +32,15 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
     contact_name TEXT,
 
-    email TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL UNIQUE,
 
     phone TEXT,
 
     password TEXT NOT NULL,
 
-    status TEXT DEFAULT 'active',
+    status TEXT NOT NULL
+        DEFAULT 'active'
+        CHECK (status IN ('active','inactive')),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 
@@ -56,11 +58,15 @@ CREATE TABLE IF NOT EXISTS products (
 
     category TEXT NOT NULL,
 
-    unit TEXT DEFAULT 'kg',
+    unit TEXT NOT NULL
+        DEFAULT 'kg'
+        CHECK (unit IN ('kg','un','cx')),
 
     description TEXT,
 
-    status TEXT DEFAULT 'active',
+    status TEXT NOT NULL
+        DEFAULT 'active'
+        CHECK (status IN ('active','inactive')),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 
@@ -80,13 +86,16 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     deadline DATETIME NOT NULL,
 
-    status TEXT DEFAULT 'open',
+    status TEXT NOT NULL
+        DEFAULT 'open'
+        CHECK (status IN ('open','closed','cancelled')),
 
     created_by INTEGER,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (created_by) REFERENCES admins(id)
+    FOREIGN KEY (created_by)
+        REFERENCES admins(id)
 
 );
 
@@ -102,7 +111,8 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     product_id INTEGER NOT NULL,
 
-    quantity REAL NOT NULL,
+    quantity REAL NOT NULL
+        CHECK (quantity > 0),
 
     FOREIGN KEY (quote_id)
         REFERENCES quotes(id)
@@ -125,9 +135,9 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
-    viewed INTEGER DEFAULT 0,
+    viewed INTEGER NOT NULL DEFAULT 0,
 
-    answered INTEGER DEFAULT 0,
+    answered INTEGER NOT NULL DEFAULT 0,
 
     answer_date DATETIME,
 
@@ -136,7 +146,9 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
         ON DELETE CASCADE,
 
     FOREIGN KEY (supplier_id)
-        REFERENCES suppliers(id)
+        REFERENCES suppliers(id),
+
+    UNIQUE (quote_id, supplier_id)
 
 );
 
@@ -152,7 +164,8 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     supplier_id INTEGER NOT NULL,
 
-    price REAL NOT NULL,
+    price REAL NOT NULL
+        CHECK (price > 0),
 
     observation TEXT,
 
@@ -163,7 +176,9 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
         ON DELETE CASCADE,
 
     FOREIGN KEY (supplier_id)
-        REFERENCES suppliers(id)
+        REFERENCES suppliers(id),
+
+    UNIQUE (quote_item_id, supplier_id)
 
 );
 
@@ -171,8 +186,20 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 -- ÍNDICES
 -- =====================================================
 
+CREATE INDEX IF NOT EXISTS idx_admins_email
+ON admins(email);
+
+CREATE INDEX IF NOT EXISTS idx_suppliers_email
+ON suppliers(email);
+
+CREATE INDEX IF NOT EXISTS idx_products_name
+ON products(name);
+
 CREATE INDEX IF NOT EXISTS idx_quotes_status
 ON quotes(status);
+
+CREATE INDEX IF NOT EXISTS idx_quotes_deadline
+ON quotes(deadline);
 
 CREATE INDEX IF NOT EXISTS idx_quote_items_quote
 ON quote_items(quote_id);

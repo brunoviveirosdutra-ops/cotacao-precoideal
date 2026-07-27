@@ -2,8 +2,12 @@
   "name": "cotacao-precoideal",
   "version": "1.0.0",
   "description": "Sistema de gerenciamento de cotações",
+  "private": true,
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"

@@ -4,7 +4,14 @@
 // ======================================================
 
 
+if (!window.produtosModuloCarregado) {
+
+
+window.produtosModuloCarregado = true;
+
+
 let productModal = null;
+
 
 
 // iniciar módulo
@@ -34,6 +41,7 @@ async function iniciarProdutos(){
 
 
 
+
 // ======================================================
 // MODAL
 // ======================================================
@@ -60,6 +68,7 @@ function configurarModalProduto(){
 
 
 
+
 // ======================================================
 // EVENTOS
 // ======================================================
@@ -77,23 +86,23 @@ function configurarEventosProduto(){
     if(btnNovo){
 
 
-        btnNovo.addEventListener(
-            "click",
-            ()=>{
+        btnNovo.onclick = () => {
 
 
-                limparProduto();
+            limparProduto();
 
+
+            if(productModal){
 
                 productModal.show();
 
-
             }
-        );
+
+
+        };
 
 
     }
-
 
 
 
@@ -106,16 +115,15 @@ function configurarEventosProduto(){
     if(btnSalvar){
 
 
-        btnSalvar.addEventListener(
-            "click",
-            salvarProduto
-        );
+        btnSalvar.onclick =
+            salvarProduto;
 
 
     }
 
 
 }
+
 
 
 
@@ -133,12 +141,39 @@ async function carregarProdutos(){
 
         const response =
             await fetch(
-                "/api/products"
+                "/api/products",
+                {
+
+                    credentials:
+                        "include"
+
+                }
             );
 
 
-        const products =
+
+        const data =
             await response.json();
+
+
+
+        if(!response.ok){
+
+
+            console.error(
+                data.message
+            );
+
+
+            return;
+
+
+        }
+
+
+
+        const products =
+            data.products || data;
 
 
 
@@ -179,73 +214,106 @@ async function carregarProdutos(){
 
             return;
 
+
         }
 
 
 
 
-
-        products.forEach(product=>{
+        products.forEach(product => {
 
 
             tbody.innerHTML += `
 
 
-                <tr>
+            <tr>
 
 
-                    <td>
-                        ${product.id}
-                    </td>
+                <td>
+                    ${product.id}
+                </td>
 
 
-                    <td>
-                        ${product.name}
-                    </td>
+                <td>
+                    ${product.name}
+                </td>
 
 
-                    <td>
-                        ${product.category}
-                    </td>
+                <td>
+                    ${product.category}
+                </td>
 
 
-                    <td>
-                        ${product.unit}
-                    </td>
+                <td>
+                    ${product.unit}
+                </td>
 
 
-                    <td>
-
-                        <span class="badge bg-success">
-
-                            ${product.status}
-
-                        </span>
-
-                    </td>
+                <td>
 
 
+                    <span class="badge ${
+                    
+                    product.status === "active"
 
-                    <td>
+                    ? "bg-success"
 
+                    : "bg-secondary"
 
-                        <button
-
-                            class="btn btn-danger btn-sm"
-
-                            onclick="excluirProduto(${product.id})">
-
-
-                            Excluir
+                    }">
 
 
-                        </button>
+                        ${product.status}
 
 
-                    </td>
+                    </span>
 
 
-                </tr>
+                </td>
+
+
+
+                <td>
+
+
+                    ${
+                    product.status === "active"
+
+                    ?
+
+                    `
+
+                    <button
+
+                    class="btn btn-danger btn-sm"
+
+                    onclick="excluirProduto(${product.id})">
+
+
+                    Desativar
+
+
+                    </button>
+
+                    `
+
+                    :
+
+                    `
+
+                    <span class="text-muted">
+                    Inativo
+                    </span>
+
+                    `
+
+                    }
+
+
+                </td>
+
+
+            </tr>
 
 
             `;
@@ -258,13 +326,17 @@ async function carregarProdutos(){
     }catch(error){
 
 
-        console.error(error);
+        console.error(
+            "Erro ao carregar produtos:",
+            error
+        );
 
 
     }
 
 
 }
+
 
 
 
@@ -282,21 +354,21 @@ async function salvarProduto(){
 
 
         name:
-            document.getElementById(
-                "productName"
-            ).value,
+        document.getElementById(
+            "productName"
+        ).value,
 
 
         category:
-            document.getElementById(
-                "productCategory"
-            ).value,
+        document.getElementById(
+            "productCategory"
+        ).value,
 
 
         unit:
-            document.getElementById(
-                "productUnit"
-            ).value
+        document.getElementById(
+            "productUnit"
+        ).value
 
 
     };
@@ -318,7 +390,6 @@ async function salvarProduto(){
 
 
 
-
     try{
 
 
@@ -328,22 +399,25 @@ async function salvarProduto(){
                 {
 
 
-                    method:
-                        "POST",
+                    method:"POST",
+
+
+                    credentials:
+                        "include",
 
 
                     headers:{
 
 
                         "Content-Type":
-                            "application/json"
+                        "application/json"
 
 
                     },
 
 
                     body:
-                        JSON.stringify(dados)
+                    JSON.stringify(dados)
 
 
                 }
@@ -371,7 +445,12 @@ async function salvarProduto(){
 
 
 
-        productModal.hide();
+        if(productModal){
+
+            productModal.hide();
+
+        }
+
 
 
         limparProduto();
@@ -397,7 +476,7 @@ async function salvarProduto(){
 
 
 // ======================================================
-// EXCLUIR
+// DESATIVAR PRODUTO
 // ======================================================
 
 
@@ -406,29 +485,46 @@ async function excluirProduto(id){
 
     if(
         !confirm(
-            "Excluir produto?"
+            "Deseja desativar este produto?"
         )
-    )
+    ){
+
         return;
 
-
-
-    await fetch(
-
-        `/api/products/${id}`,
-
-        {
-
-            method:
-                "DELETE"
-
-        }
-
-    );
+    }
 
 
 
-    carregarProdutos();
+    try{
+
+
+        await fetch(
+
+            `/api/products/${id}`,
+
+            {
+
+                method:"DELETE",
+
+                credentials:
+                    "include"
+
+            }
+
+        );
+
+
+        carregarProdutos();
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+    }
 
 
 }
@@ -442,6 +538,7 @@ window.excluirProduto =
 
 
 
+
 // ======================================================
 // LIMPAR
 // ======================================================
@@ -450,9 +547,21 @@ window.excluirProduto =
 function limparProduto(){
 
 
-    document.getElementById(
-        "productName"
-    ).value = "";
+    const campo =
+        document.getElementById(
+            "productName"
+        );
+
+
+    if(campo){
+
+        campo.value = "";
+
+    }
+
+
+}
+
 
 
 }

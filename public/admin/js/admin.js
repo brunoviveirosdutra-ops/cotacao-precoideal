@@ -1,81 +1,100 @@
 const form = document.getElementById("loginForm");
-
 const message = document.getElementById("message");
 
 
-form.addEventListener("submit", async (event) => {
+if (form) {
 
-    event.preventDefault();
+    form.addEventListener("submit", async (event) => {
 
-
-    const email = document.getElementById("email").value;
-
-    const password = document.getElementById("password").value;
+        event.preventDefault();
 
 
-    try {
+        const email = document.getElementById("email").value.trim();
+
+        const password = document.getElementById("password").value;
 
 
-        const response = await fetch(
-            "/api/auth/login",
-            {
+        if (!email || !password) {
 
-                method: "POST",
+            message.innerHTML = "Informe email e senha.";
 
-                headers: {
+            return;
 
-                    "Content-Type": "application/json"
+        }
 
-                },
 
-                body: JSON.stringify({
+        try {
 
-                    email,
 
-                    password
+            const response = await fetch(
+                "/api/auth/login",
+                {
 
-                })
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type": "application/json"
+
+                    },
+
+                    credentials: "include",
+
+                    body: JSON.stringify({
+
+                        email,
+
+                        password
+
+                    })
+
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (data.success) {
+
+
+                message.innerHTML =
+                    "Login realizado com sucesso";
+
+
+                setTimeout(() => {
+
+
+                    window.location.href =
+                        "/admin/admin.html";
+
+
+                }, 1000);
+
+
+            } else {
+
+
+                message.innerHTML =
+                    data.message || "Email ou senha inválidos";
+
 
             }
-        );
 
 
-        const data = await response.json();
+        } catch (error) {
 
 
-        if(data.success){
-
-
-            message.innerHTML =
-            "Login realizado com sucesso";
-
-
-            setTimeout(() => {
-
-                window.location.href =
-                "/admin/admin.html";
-
-            },1000);
-
-
-        }else{
+            console.error("Erro no login:", error);
 
 
             message.innerHTML =
-            data.message;
+                "Erro ao conectar com servidor";
 
 
         }
 
 
-    } catch(error){
+    });
 
-        message.innerHTML =
-        "Erro ao conectar com servidor";
-
-        console.error(error);
-
-    }
-
-
-});
+}

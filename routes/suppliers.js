@@ -9,6 +9,8 @@ import {
 
 const router = express.Router();
 
+import authMiddleware from "../middleware/auth.js";
+
 router.get("/", getSuppliers);
 
 router.get("/:id", getSupplierById);
