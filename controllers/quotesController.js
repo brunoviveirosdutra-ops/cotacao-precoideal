@@ -1,4 +1,5 @@
 import { getDatabase } from "../database/database.js";
+import crypto from "crypto";
 
 
 // ======================================================
@@ -209,9 +210,7 @@ export const createQuote = async (req, res) => {
 
         // Inserir produtos
 
-        if (
-            Array.isArray(products)
-        ) {
+        if (Array.isArray(products)) {
 
 
             for (const product of products) {
@@ -233,13 +232,9 @@ export const createQuote = async (req, res) => {
                     `,
 
                     [
-
                         quoteId,
-
                         product.product_id,
-
                         product.quantity
-
                     ]
 
                 );
@@ -251,14 +246,16 @@ export const createQuote = async (req, res) => {
 
 
 
-        // Inserir fornecedores
+        // Inserir fornecedores COM TOKEN
 
-        if (
-            Array.isArray(suppliers)
-        ) {
+        if (Array.isArray(suppliers)) {
 
 
             for (const supplierId of suppliers) {
+
+
+                const accessToken = crypto.randomUUID();
+
 
 
                 await db.run(
@@ -267,20 +264,19 @@ export const createQuote = async (req, res) => {
                     INSERT INTO quote_suppliers
                     (
                         quote_id,
-                        supplier_id
+                        supplier_id,
+                        access_token
                     )
                     VALUES
                     (
-                        ?, ?
+                        ?, ?, ?
                     )
                     `,
 
                     [
-
                         quoteId,
-
-                        supplierId
-
+                        supplierId,
+                        accessToken
                     ]
 
                 );

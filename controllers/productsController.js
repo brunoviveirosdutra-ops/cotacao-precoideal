@@ -215,10 +215,54 @@ export const updateProduct = async (req, res) => {
 };
 
 // ======================================================
-// EXCLUIR PRODUTO
+// EXCLUIR
 // ======================================================
 
 export const deleteProduct = async (req, res) => {
+
+    try {
+
+        const db = await getDatabase();
+
+        await db.run(
+            `
+            UPDATE products
+            SET status = 'inactive'
+            WHERE id = ?
+            `,
+            [req.params.id]
+        );
+
+        res.json({
+
+            success: true,
+
+            message: "Produto inativado com sucesso."
+
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: "Erro ao inativar produto."
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// REATIVAR PRODUTO
+// ======================================================
+
+export const activateProduct = async (req, res) => {
 
     try {
 
@@ -270,20 +314,16 @@ export const deleteProduct = async (req, res) => {
         */
 
         await db.run(
-            `
-            UPDATE products
-            SET status = 'inactive'
-            WHERE id = ?
-            `,
-            [id]
-        );
 
+            "DELETE FROM products WHERE id=?",
+
+            [req.params.id]
+
+        );
 
         res.json({
 
-            success: true,
-
-            message: "Produto desativado com sucesso."
+            success: true
 
         });
 
@@ -296,9 +336,7 @@ export const deleteProduct = async (req, res) => {
 
         res.status(500).json({
 
-            success: false,
-
-            message: "Erro ao desativar produto."
+            success: false
 
         });
 

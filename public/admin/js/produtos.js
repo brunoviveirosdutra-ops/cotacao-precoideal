@@ -15,19 +15,20 @@ let productModal = null;
 
 
 // iniciar módulo
-
 iniciarProdutos();
 
 
+
+// ======================================================
+// INICIAR
+// ======================================================
 
 async function iniciarProdutos(){
 
 
     configurarModalProduto();
 
-
     configurarEventosProduto();
-
 
     await carregarProdutos();
 
@@ -83,6 +84,7 @@ function configurarEventosProduto(){
         );
 
 
+
     if(btnNovo){
 
 
@@ -106,10 +108,13 @@ function configurarEventosProduto(){
 
 
 
+
+
     const btnSalvar =
         document.getElementById(
             "btnSalvarProduto"
         );
+
 
 
     if(btnSalvar){
@@ -145,7 +150,7 @@ async function carregarProdutos(){
                 {
 
                     credentials:
-                        "include"
+                    "include"
 
                 }
             );
@@ -189,7 +194,10 @@ async function carregarProdutos(){
 
 
 
+
         tbody.innerHTML = "";
+
+
 
 
 
@@ -201,7 +209,7 @@ async function carregarProdutos(){
                 <tr>
 
                     <td colspan="6"
-                        class="text-center">
+                    class="text-center">
 
                         Nenhum produto cadastrado.
 
@@ -220,7 +228,9 @@ async function carregarProdutos(){
 
 
 
+
         products.forEach(product => {
+
 
 
             tbody.innerHTML += `
@@ -251,7 +261,6 @@ async function carregarProdutos(){
 
                 <td>
 
-
                     <span class="badge ${
                     
                     product.status === "active"
@@ -263,7 +272,7 @@ async function carregarProdutos(){
                     }">
 
 
-                        ${product.status}
+                    ${product.status}
 
 
                     </span>
@@ -290,20 +299,31 @@ async function carregarProdutos(){
                     onclick="excluirProduto(${product.id})">
 
 
-                    Desativar
+                    Inativar
 
 
                     </button>
 
                     `
 
+
                     :
+
 
                     `
 
-                    <span class="text-muted">
-                    Inativo
-                    </span>
+                    <button
+
+                    class="btn btn-success btn-sm"
+
+                    onclick="reativarProduto(${product.id})">
+
+
+                    Reativar
+
+
+                    </button>
+
 
                     `
 
@@ -320,6 +340,7 @@ async function carregarProdutos(){
 
 
         });
+
 
 
 
@@ -342,12 +363,14 @@ async function carregarProdutos(){
 
 
 
+
 // ======================================================
 // SALVAR PRODUTO
 // ======================================================
 
 
 async function salvarProduto(){
+
 
 
     const dados = {
@@ -359,10 +382,12 @@ async function salvarProduto(){
         ).value,
 
 
+
         category:
         document.getElementById(
             "productCategory"
         ).value,
+
 
 
         unit:
@@ -372,6 +397,8 @@ async function salvarProduto(){
 
 
     };
+
+
 
 
 
@@ -390,12 +417,17 @@ async function salvarProduto(){
 
 
 
+
+
+
     try{
 
 
         const response =
             await fetch(
+
                 "/api/products",
+
                 {
 
 
@@ -403,7 +435,8 @@ async function salvarProduto(){
 
 
                     credentials:
-                        "include",
+                    "include",
+
 
 
                     headers:{
@@ -416,17 +449,23 @@ async function salvarProduto(){
                     },
 
 
+
                     body:
                     JSON.stringify(dados)
 
 
                 }
+
             );
+
+
 
 
 
         const result =
             await response.json();
+
+
 
 
 
@@ -445,6 +484,7 @@ async function salvarProduto(){
 
 
 
+
         if(productModal){
 
             productModal.hide();
@@ -453,10 +493,14 @@ async function salvarProduto(){
 
 
 
+
+
         limparProduto();
 
 
         carregarProdutos();
+
+
 
 
 
@@ -475,23 +519,27 @@ async function salvarProduto(){
 
 
 
+
+
 // ======================================================
-// DESATIVAR PRODUTO
+// INATIVAR PRODUTO
 // ======================================================
 
 
 async function excluirProduto(id){
 
 
+
     if(
         !confirm(
-            "Deseja desativar este produto?"
+            "Inativar produto?"
         )
     ){
 
         return;
 
     }
+
 
 
 
@@ -504,17 +552,22 @@ async function excluirProduto(id){
 
             {
 
+
                 method:"DELETE",
 
+
                 credentials:
-                    "include"
+                "include"
+
 
             }
 
         );
 
 
+
         carregarProdutos();
+
 
 
 
@@ -539,6 +592,122 @@ window.excluirProduto =
 
 
 
+
+// ======================================================
+// REATIVAR PRODUTO
+// ======================================================
+
+
+async function reativarProduto(id){
+
+
+
+    if(
+        !confirm(
+            "Reativar produto?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+    try{
+
+
+
+        const response =
+            await fetch(
+
+                `/api/products/activate/${id}`,
+
+                {
+
+
+                    method:"PUT",
+
+
+                    credentials:
+                    "include"
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+        const result =
+            await response.json();
+
+
+
+
+
+
+
+        if(!response.ok){
+
+
+            alert(
+                result.message ||
+                "Erro ao reativar produto."
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        carregarProdutos();
+
+
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+
+        alert(
+            "Erro ao reativar produto."
+        );
+
+
+    }
+
+
+}
+
+
+
+
+window.reativarProduto =
+    reativarProduto;
+
+
+
+
+
+
+
+
 // ======================================================
 // LIMPAR
 // ======================================================
@@ -547,10 +716,12 @@ window.excluirProduto =
 function limparProduto(){
 
 
+
     const campo =
         document.getElementById(
             "productName"
         );
+
 
 
     if(campo){
@@ -558,6 +729,7 @@ function limparProduto(){
         campo.value = "";
 
     }
+
 
 
 }

@@ -8,6 +8,21 @@ const __dirname = path.dirname(__filename);
 
 const databasePath = path.join(__dirname, "cotacao.db");
 
+<<<<<<< HEAD
+export async function getDatabase() {
+    const db = await open({
+        filename: databasePath,
+        driver: sqlite3.Database
+    });
+
+    await db.exec(`
+        PRAGMA foreign_keys = ON;
+        PRAGMA journal_mode = WAL;
+        PRAGMA synchronous = NORMAL;
+    `);
+
+    return db;
+=======
 // Mantém uma única conexão durante toda a execução
 let database = null;
 
@@ -43,4 +58,5 @@ export async function getDatabase() {
 
     }
 
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 }

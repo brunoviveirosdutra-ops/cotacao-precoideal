@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<title>Cadastro Fornecedores</title>
+</head>
+
+<body>
+
+<h1>Fornecedores de Teste</h1>
+
+<button onclick="cadastrarFornecedores()">
+Cadastrar Fornecedores
+</button>
+
+<pre id="resultado"></pre>
+
+
+<script>
+
+async function cadastrarFornecedores(){
+
+    const fornecedores = [
+
+        {
+            company_name:"Frigorífico Alfa",
+            cnpj:"11.111.111/0001-11",
+            contact_name:"João Silva",
+            email:"contato@alfa.com",
+            phone:"11999990001",
+            password:"123456"
+        },
+
+        {
+            company_name:"Distribuidora Boa Carne",
+            cnpj:"22.222.222/0001-22",
+            contact_name:"Carlos Souza",
+            email:"contato@boacarne.com",
+            phone:"11999990002",
+            password:"123456"
+        },
+
+        {
+            company_name:"Frango Brasil",
+            cnpj:"33.333.333/0001-33",
+            contact_name:"Marcos Oliveira",
+            email:"contato@frangobrasil.com",
+            phone:"11999990003",
+            password:"123456"
+        }
+
+    ];
+
+
+    let retorno=[];
+
+
+    for(const fornecedor of fornecedores){
+
+        const resposta = await fetch("/api/suppliers",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(fornecedor)
+
+        });
+
+
+        retorno.push(await resposta.json());
+
+    }
+
+
+    document.getElementById("resultado").textContent =
+        JSON.stringify(retorno,null,2);
+
+}
+
+</script>
+
+</body>
+
+</html>

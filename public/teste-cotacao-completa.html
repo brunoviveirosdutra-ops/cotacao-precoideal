@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Criar Cotação Completa</h2>
+
+<button onclick="criar()">
+Criar Cotação
+</button>
+
+<pre id="resultado"></pre>
+
+
+<script>
+
+async function criar(){
+
+const resposta = await fetch("/api/quotations",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+title:"Compra semanal carnes",
+
+description:"Cotação completa teste",
+
+deadline:"2026-07-30",
+
+products:[
+
+{
+product_id:1,
+quantity:300
+},
+
+{
+product_id:4,
+quantity:500
+}
+
+],
+
+suppliers:[
+
+1,
+2,
+3
+
+]
+
+})
+
+});
+
+
+const dados = await resposta.json();
+
+
+document.getElementById("resultado").textContent =
+JSON.stringify(dados,null,2);
+
+
+}
+
+</script>
+
+
+</body>
+</html>

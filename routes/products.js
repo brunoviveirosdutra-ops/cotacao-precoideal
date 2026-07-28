@@ -5,32 +5,65 @@ import {
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    activateProduct
 } from "../controllers/productsController.js";
-
-// Futuramente
-// import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ======================================
-// PRODUTOS
-// ======================================
-import authMiddleware from "../middleware/auth.js";
 
-// Listar todos
-router.get("/", getProducts);
+// ======================================================
+// LISTAR PRODUTOS
+// ======================================================
+router.get(
+    "/",
+    getProducts
+);
 
-// Buscar por ID
-router.get("/:id", getProductById);
 
-// Criar
-router.post("/", createProduct);
+// ======================================================
+// BUSCAR PRODUTO POR ID
+// ======================================================
+router.get(
+    "/:id",
+    getProductById
+);
 
-// Atualizar
-router.put("/:id", updateProduct);
 
-// Excluir
-router.delete("/:id", deleteProduct);
+// ======================================================
+// CADASTRAR PRODUTO
+// ======================================================
+router.post(
+    "/",
+    createProduct
+);
+
+
+// ======================================================
+// ATUALIZAR PRODUTO
+// ======================================================
+router.put(
+    "/:id",
+    updateProduct
+);
+
+
+// ======================================================
+// INATIVAR PRODUTO
+// ======================================================
+router.delete(
+    "/:id",
+    deleteProduct
+);
+
+
+// ======================================================
+// REATIVAR PRODUTO
+// ======================================================
+router.put(
+    "/activate/:id",
+    activateProduct
+);
+
 
 export default router;

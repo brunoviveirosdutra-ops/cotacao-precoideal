@@ -1,0 +1,85 @@
+<div class="container-fluid">
+
+    <h3>
+        Comparação de Preços
+    </h3>
+
+
+    <div class="mb-3">
+
+        <label>
+            ID da Cotação
+        </label>
+
+        <input 
+            type="number"
+            id="quoteId"
+            class="form-control"
+            placeholder="Digite o ID da cotação">
+
+    </div>
+
+
+    <button
+        class="btn btn-primary"
+        onclick="buscarComparacao()">
+
+        Buscar Comparação
+
+    </button>
+
+
+
+    <hr>
+
+
+
+    <table class="table table-bordered">
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Produto
+                </th>
+
+
+                <th>
+                    Unidade
+                </th>
+
+
+                <th>
+                    Fornecedor
+                </th>
+
+
+                <th>
+                    Preço
+                </th>
+
+
+                <th>
+                    Melhor Preço
+                </th>
+
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="comparisonTable">
+
+
+        </tbody>
+
+
+    </table>
+
+
+</div>
+
+
+<script src="js/comparacao.js"></script>
