@@ -3,26 +3,35 @@ import { adminLogin } from "../controllers/authController.js";
 
 const router = express.Router();
 
+// ======================================
+// TESTE
+// ======================================
 
 router.get("/teste", (req, res) => {
 
     res.json({
-        mensagem: "Rota de autenticação funcionando"
+        success: true,
+        message: "Rota de autenticação funcionando."
     });
 
 });
 
+// ======================================
+// LOGIN
+// ======================================
 
 router.post("/login", adminLogin);
 
-
-export default router;
+// ======================================
+// ADMIN LOGADO
+// ======================================
 
 router.get("/me", (req, res) => {
 
     if (!req.session.admin) {
         return res.status(401).json({
-            success: false
+            success: false,
+            message: "Usuário não autenticado."
         });
     }
 
@@ -32,14 +41,31 @@ router.get("/me", (req, res) => {
     });
 
 });
+
+// ======================================
+// LOGOUT
+// ======================================
+
 router.post("/logout", (req, res) => {
 
-    req.session.destroy(() => {
+    req.session.destroy((err) => {
+
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Erro ao encerrar a sessão."
+            });
+        }
+
+        res.clearCookie("connect.sid");
 
         res.json({
-            success: true
+            success: true,
+            message: "Logout realizado com sucesso."
         });
 
     });
 
 });
+
+export default router;

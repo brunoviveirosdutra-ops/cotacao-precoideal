@@ -11,6 +11,8 @@ import {
 
 const router = express.Router();
 
+import authMiddleware from "../middleware/auth.js";
+
 
 // LOGIN FORNECEDOR
 router.post("/login", supplierLogin);

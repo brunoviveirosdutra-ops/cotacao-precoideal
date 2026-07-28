@@ -32,7 +32,7 @@ export const getProducts = async (req, res) => {
 };
 
 // ======================================================
-// BUSCAR PRODUTO
+// BUSCAR PRODUTO POR ID
 // ======================================================
 
 export const getProductById = async (req, res) => {
@@ -42,7 +42,7 @@ export const getProductById = async (req, res) => {
         const db = await getDatabase();
 
         const product = await db.get(
-            "SELECT * FROM products WHERE id=?",
+            "SELECT * FROM products WHERE id = ?",
             [req.params.id]
         );
 
@@ -81,16 +81,22 @@ export const createProduct = async (req, res) => {
         const db = await getDatabase();
 
         const {
-
             name,
             category,
             unit,
             description
-
         } = req.body;
 
-        const result = await db.run(
+        if (!name?.trim() || !category?.trim() || !unit?.trim()) {
 
+            return res.status(400).json({
+                success: false,
+                message: "Nome, categoria e unidade são obrigatórios."
+            });
+
+        }
+
+        const result = await db.run(
             `
             INSERT INTO products
             (
@@ -100,26 +106,20 @@ export const createProduct = async (req, res) => {
                 description
             )
             VALUES
-            (
-                ?, ?, ?, ?
-            )
+            (?, ?, ?, ?)
             `,
-
             [
                 name,
                 category,
                 unit,
-                description
+                description || ""
             ]
-
         );
 
-        res.json({
-
+        res.status(201).json({
             success: true,
-
-            id: result.lastID
-
+            id: result.lastID,
+            message: "Produto cadastrado com sucesso."
         });
 
     } catch (error) {
@@ -127,11 +127,8 @@ export const createProduct = async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-
             success: false,
-
             message: "Erro ao cadastrar produto."
-
         });
 
     }
@@ -139,7 +136,86 @@ export const createProduct = async (req, res) => {
 };
 
 // ======================================================
-// INATIVAR PRODUTO
+// ATUALIZAR PRODUTO
+// ======================================================
+
+export const updateProduct = async (req, res) => {
+
+    try {
+
+        const db = await getDatabase();
+
+        const id = req.params.id;
+
+        const {
+            name,
+            category,
+            unit,
+            description
+        } = req.body;
+
+        if (!name?.trim() || !category?.trim() || !unit?.trim()) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Nome, categoria e unidade são obrigatórios."
+            });
+
+        }
+
+        const product = await db.get(
+            "SELECT id FROM products WHERE id = ?",
+            [id]
+        );
+
+        if (!product) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Produto não encontrado."
+            });
+
+        }
+
+        await db.run(
+            `
+            UPDATE products
+            SET
+                name = ?,
+                category = ?,
+                unit = ?,
+                description = ?
+            WHERE id = ?
+            `,
+            [
+                name,
+                category,
+                unit,
+                description || "",
+                id
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: "Produto atualizado com sucesso."
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Erro ao atualizar produto."
+        });
+
+    }
+
+};
+
+// ======================================================
+// EXCLUIR
 // ======================================================
 
 export const deleteProduct = async (req, res) => {
@@ -192,13 +268,54 @@ export const activateProduct = async (req, res) => {
 
         const db = await getDatabase();
 
-        await db.run(
+        const { id } = req.params;
 
+
+        // Verifica se o produto existe
+        const product = await db.get(
             `
-            UPDATE products
-            SET status = 'active'
+            SELECT id, status
+            FROM products
             WHERE id = ?
             `,
+            [id]
+        );
+
+
+        if (!product) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Produto não encontrado."
+            });
+
+        }
+
+
+        // Verifica se o produto já está inativo
+        if (product.status === "inactive") {
+
+            return res.status(400).json({
+                success: false,
+                message: "Este produto já está desativado."
+            });
+
+        }
+
+
+        /*
+            Não vamos excluir o produto.
+            Apenas mudamos o status para inactive.
+
+            Isso mantém:
+            - histórico das cotações
+            - respostas dos fornecedores
+            - relatórios antigos
+        */
+
+        await db.run(
+
+            "DELETE FROM products WHERE id=?",
 
             [req.params.id]
 
@@ -206,24 +323,23 @@ export const activateProduct = async (req, res) => {
 
         res.json({
 
-            success: true,
-
-            message: "Produto reativado com sucesso."
+            success: true
 
         });
 
 
     } catch (error) {
 
-        console.error(error);
+
+        console.error("Erro ao desativar produto:", error);
+
 
         res.status(500).json({
 
-            success: false,
-
-            message: "Erro ao reativar produto."
+            success: false
 
         });
+
 
     }
 

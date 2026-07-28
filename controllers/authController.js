@@ -6,13 +6,19 @@ export async function adminLogin(req, res) {
 
     try {
 
-        const { email, password } = req.body;
+
+        const email = req.body.email?.trim();
+        const password = req.body.password;
 
 
         if (!email || !password) {
 
             return res.status(400).json({
-                message: "Email e senha obrigatórios"
+
+                success: false,
+
+                message: "E-mail e senha são obrigatórios."
+
             });
 
         }
@@ -34,7 +40,11 @@ export async function adminLogin(req, res) {
         if (!admin) {
 
             return res.status(401).json({
-                message: "Usuário ou senha inválidos"
+
+                success: false,
+
+                message: "Usuário ou senha inválidos."
+
             });
 
         }
@@ -49,41 +59,84 @@ export async function adminLogin(req, res) {
         if (!passwordValid) {
 
             return res.status(401).json({
-                message: "Usuário ou senha inválidos"
+
+                success: false,
+
+                message: "Usuário ou senha inválidos."
+
             });
 
         }
 
 
+        // Cria sessão do administrador
         req.session.admin = {
 
             id: admin.id,
+
             name: admin.name,
+
             email: admin.email
 
         };
+console.log("ID DA SESSÃO:", req.sessionID);
+console.log("ADMIN:", req.session.admin);
+
+        console.log(
+            "SESSÃO CRIADA:",
+            req.session.admin
+        );
+
+
+        // Salva a sessão antes de responder
+        await new Promise((resolve, reject) => {
+
+            req.session.save((err) => {
+
+                if (err) {
+
+                    reject(err);
+
+                } else {
+
+                    resolve();
+
+                }
+
+            });
+
+        });
 
 
         return res.json({
 
             success: true,
 
-            message: "Login realizado com sucesso",
+            message: "Login realizado com sucesso.",
 
             admin: req.session.admin
 
         });
 
 
-    } catch (error) {
 
-        console.error("ERRO LOGIN:", error);
+    } catch(error) {
+
+
+        console.error(
+            "ERRO LOGIN:",
+            error
+        );
+
 
         return res.status(500).json({
 
-            message: error.message
+            success:false,
+
+            message:"Erro interno do servidor."
 
         });
+
 
     }
 

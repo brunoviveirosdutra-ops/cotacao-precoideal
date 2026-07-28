@@ -40,8 +40,14 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
     password TEXT NOT NULL,
 
+<<<<<<< HEAD
     status TEXT NOT NULL DEFAULT 'active'
         CHECK(status IN ('active','inactive')),
+=======
+    status TEXT NOT NULL
+        DEFAULT 'active'
+        CHECK (status IN ('active','inactive')),
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -61,12 +67,24 @@ CREATE TABLE IF NOT EXISTS products (
 
     category TEXT NOT NULL,
 
+<<<<<<< HEAD
     unit TEXT NOT NULL DEFAULT 'kg',
 
     description TEXT,
 
     status TEXT NOT NULL DEFAULT 'active'
         CHECK(status IN ('active','inactive')),
+=======
+    unit TEXT NOT NULL
+        DEFAULT 'kg'
+        CHECK (unit IN ('kg','un','cx')),
+
+    description TEXT,
+
+    status TEXT NOT NULL
+        DEFAULT 'active'
+        CHECK (status IN ('active','inactive')),
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -88,15 +106,24 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     deadline DATETIME NOT NULL,
 
+<<<<<<< HEAD
     status TEXT NOT NULL DEFAULT 'open'
         CHECK(status IN ('open','closed','cancelled')),
+=======
+    status TEXT NOT NULL
+        DEFAULT 'open'
+        CHECK (status IN ('open','closed','cancelled')),
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_by INTEGER,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+<<<<<<< HEAD
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+=======
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
     FOREIGN KEY (created_by)
         REFERENCES admins(id)
 
@@ -114,7 +141,12 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     product_id INTEGER NOT NULL,
 
+<<<<<<< HEAD
     quantity REAL NOT NULL DEFAULT 0,
+=======
+    quantity REAL NOT NULL
+        CHECK (quantity > 0),
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     FOREIGN KEY (quote_id)
         REFERENCES quotes(id)
@@ -139,10 +171,15 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
+<<<<<<< HEAD
     access_token TEXT NOT NULL UNIQUE,
 
     viewed INTEGER NOT NULL DEFAULT 0,
 
+=======
+    viewed INTEGER NOT NULL DEFAULT 0,
+
+>>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
     answered INTEGER NOT NULL DEFAULT 0,
 
     answer_date DATETIME,
@@ -171,7 +208,8 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     supplier_id INTEGER NOT NULL,
 
-    price REAL NOT NULL,
+    price REAL NOT NULL
+        CHECK (price > 0),
 
     observation TEXT,
 
@@ -191,6 +229,15 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 -- =====================================================
 -- ÍNDICES
 -- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_admins_email
+ON admins(email);
+
+CREATE INDEX IF NOT EXISTS idx_suppliers_email
+ON suppliers(email);
+
+CREATE INDEX IF NOT EXISTS idx_products_name
+ON products(name);
 
 CREATE INDEX IF NOT EXISTS idx_quotes_status
 ON quotes(status);

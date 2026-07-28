@@ -4,11 +4,17 @@
 // ======================================================
 
 
+if (!window.produtosModuloCarregado) {
+
+
+window.produtosModuloCarregado = true;
+
+
 let productModal = null;
 
 
-// iniciar módulo
 
+// iniciar módulo
 iniciarProdutos();
 
 
@@ -22,9 +28,7 @@ async function iniciarProdutos(){
 
     configurarModalProduto();
 
-
     configurarEventosProduto();
-
 
     await carregarProdutos();
 
@@ -35,6 +39,7 @@ async function iniciarProdutos(){
 
 
 }
+
 
 
 
@@ -83,19 +88,20 @@ function configurarEventosProduto(){
     if(btnNovo){
 
 
-        btnNovo.addEventListener(
-            "click",
-            ()=>{
+        btnNovo.onclick = () => {
 
 
-                limparProduto();
+            limparProduto();
 
+
+            if(productModal){
 
                 productModal.show();
 
-
             }
-        );
+
+
+        };
 
 
     }
@@ -114,17 +120,14 @@ function configurarEventosProduto(){
     if(btnSalvar){
 
 
-        btnSalvar.addEventListener(
-            "click",
-            salvarProduto
-        );
+        btnSalvar.onclick =
+            salvarProduto;
 
 
     }
 
 
 }
-
 
 
 
@@ -143,14 +146,39 @@ async function carregarProdutos(){
 
         const response =
             await fetch(
-                "/api/products"
+                "/api/products",
+                {
+
+                    credentials:
+                    "include"
+
+                }
             );
 
 
 
-        const products =
+        const data =
             await response.json();
 
+
+
+        if(!response.ok){
+
+
+            console.error(
+                data.message
+            );
+
+
+            return;
+
+
+        }
+
+
+
+        const products =
+            data.products || data;
 
 
 
@@ -163,7 +191,6 @@ async function carregarProdutos(){
 
         if(!tbody)
             return;
-
 
 
 
@@ -182,7 +209,7 @@ async function carregarProdutos(){
                 <tr>
 
                     <td colspan="6"
-                        class="text-center">
+                    class="text-center">
 
                         Nenhum produto cadastrado.
 
@@ -202,119 +229,111 @@ async function carregarProdutos(){
 
 
 
-
-        products.forEach(product=>{
+        products.forEach(product => {
 
 
 
             tbody.innerHTML += `
 
 
-                <tr>
+            <tr>
 
 
-                    <td>
-                        ${product.id}
-                    </td>
+                <td>
+                    ${product.id}
+                </td>
 
 
-
-                    <td>
-                        ${product.name}
-                    </td>
-
+                <td>
+                    ${product.name}
+                </td>
 
 
-                    <td>
-                        ${product.category}
-                    </td>
+                <td>
+                    ${product.category}
+                </td>
 
 
-
-                    <td>
-                        ${product.unit}
-                    </td>
-
+                <td>
+                    ${product.unit}
+                </td>
 
 
+                <td>
 
-                    <td>
+                    <span class="badge ${
+                    
+                    product.status === "active"
 
+                    ? "bg-success"
 
-                        <span class="badge ${
-                            product.status === "active"
-                            ? "bg-success"
-                            : "bg-secondary"
-                        }">
+                    : "bg-secondary"
 
-                            ${product.status}
-
-                        </span>
+                    }">
 
 
-                    </td>
+                    ${product.status}
 
 
+                    </span>
 
 
-
-                    <td>
+                </td>
 
 
 
-                        ${
-                            product.status === "inactive"
-
-                            ?
-
-                            `
-
-                            <button
-
-                                class="btn btn-success btn-sm"
-
-                                onclick="reativarProduto(${product.id})">
+                <td>
 
 
-                                Reativar
+                    ${
+                    product.status === "active"
+
+                    ?
+
+                    `
+
+                    <button
+
+                    class="btn btn-danger btn-sm"
+
+                    onclick="excluirProduto(${product.id})">
 
 
-                            </button>
+                    Inativar
 
 
-                            `
+                    </button>
+
+                    `
 
 
-                            :
+                    :
 
 
-                            `
+                    `
+
+                    <button
+
+                    class="btn btn-success btn-sm"
+
+                    onclick="reativarProduto(${product.id})">
 
 
-                            <button
-
-                                class="btn btn-danger btn-sm"
-
-                                onclick="excluirProduto(${product.id})">
+                    Reativar
 
 
-                                Inativar
+                    </button>
 
 
-                            </button>
+                    `
+
+                    }
 
 
-                            `
-
-                        }
+                </td>
 
 
-
-                    </td>
-
-
-
-                </tr>
+            </tr>
 
 
             `;
@@ -328,13 +347,17 @@ async function carregarProdutos(){
     }catch(error){
 
 
-        console.error(error);
+        console.error(
+            "Erro ao carregar produtos:",
+            error
+        );
 
 
     }
 
 
 }
+
 
 
 
@@ -353,29 +376,24 @@ async function salvarProduto(){
     const dados = {
 
 
-
         name:
-
-            document.getElementById(
-                "productName"
-            ).value,
+        document.getElementById(
+            "productName"
+        ).value,
 
 
 
         category:
-
-            document.getElementById(
-                "productCategory"
-            ).value,
+        document.getElementById(
+            "productCategory"
+        ).value,
 
 
 
         unit:
-
-            document.getElementById(
-                "productUnit"
-            ).value
-
+        document.getElementById(
+            "productUnit"
+        ).value
 
 
     };
@@ -413,8 +431,11 @@ async function salvarProduto(){
                 {
 
 
-                    method:
-                        "POST",
+                    method:"POST",
+
+
+                    credentials:
+                    "include",
 
 
 
@@ -422,7 +443,7 @@ async function salvarProduto(){
 
 
                         "Content-Type":
-                            "application/json"
+                        "application/json"
 
 
                     },
@@ -430,14 +451,12 @@ async function salvarProduto(){
 
 
                     body:
-
-                        JSON.stringify(dados)
+                    JSON.stringify(dados)
 
 
                 }
 
             );
-
 
 
 
@@ -466,14 +485,17 @@ async function salvarProduto(){
 
 
 
+        if(productModal){
+
+            productModal.hide();
+
+        }
 
 
-        productModal.hide();
 
 
 
         limparProduto();
-
 
 
         carregarProdutos();
@@ -512,10 +534,11 @@ async function excluirProduto(id){
         !confirm(
             "Inativar produto?"
         )
-    )
+    ){
 
         return;
 
+    }
 
 
 
@@ -530,12 +553,11 @@ async function excluirProduto(id){
             {
 
 
-                method:
-                    "DELETE",
+                method:"DELETE",
 
 
                 credentials:
-                    "include"
+                "include"
 
 
             }
@@ -558,9 +580,7 @@ async function excluirProduto(id){
     }
 
 
-
 }
-
 
 
 
@@ -586,11 +606,11 @@ async function reativarProduto(id){
         !confirm(
             "Reativar produto?"
         )
-    )
+    ){
 
         return;
 
-
+    }
 
 
 
@@ -608,12 +628,11 @@ async function reativarProduto(id){
                 {
 
 
-                    method:
-                        "PUT",
+                    method:"PUT",
 
 
                     credentials:
-                        "include"
+                    "include"
 
 
                 }
@@ -628,7 +647,6 @@ async function reativarProduto(id){
 
         const result =
             await response.json();
-
 
 
 
@@ -675,7 +693,6 @@ async function reativarProduto(id){
     }
 
 
-
 }
 
 
@@ -700,9 +717,22 @@ function limparProduto(){
 
 
 
-    document.getElementById(
-        "productName"
-    ).value = "";
+    const campo =
+        document.getElementById(
+            "productName"
+        );
+
+
+
+    if(campo){
+
+        campo.value = "";
+
+    }
+
+
+
+}
 
 
 
