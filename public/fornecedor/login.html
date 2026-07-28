@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Login Fornecedor</title>
+
+</head>
+
+
+<body>
+
+
+<h2>Painel do Fornecedor</h2>
+
+
+<input 
+    id="email" 
+    type="email"
+    placeholder="Email"
+>
+
+
+<br><br>
+
+
+<input 
+    id="password"
+    type="password"
+    placeholder="Senha"
+>
+
+
+<br><br>
+
+
+<button onclick="login()">
+    Entrar
+</button>
+
+
+<p id="msg"></p>
+
+
+
+<script>
+
+
+async function login(){
+
+
+    const email =
+    document.getElementById("email").value;
+
+
+    const password =
+    document.getElementById("password").value;
+
+
+
+    if(!email || !password){
+
+        document.getElementById("msg").innerText =
+        "Informe email e senha";
+
+        return;
+
+    }
+
+
+
+    try {
+
+
+        const response = await fetch(
+            "/api/supplier/login",
+            {
+
+                method:"POST",
+
+                headers:{
+
+                    "Content-Type":"application/json"
+
+                },
+
+
+                credentials:"include",
+
+
+                body:JSON.stringify({
+
+                    email,
+
+                    password
+
+                })
+
+
+            }
+        );
+
+
+
+        const data = await response.json();
+
+
+
+        console.log(
+            "RESPOSTA LOGIN:",
+            data
+        );
+
+
+
+        if(data.success){
+
+
+            document.getElementById("msg").innerText =
+            "Login realizado. Entrando...";
+
+
+
+            console.log(
+                "SESSÃO FORNECEDOR:",
+                data.supplier
+            );
+
+
+
+            setTimeout(()=>{
+
+
+                window.location.href =
+                "/fornecedor/painel.html";
+
+
+            },1000);
+
+
+
+        }else{
+
+
+            document.getElementById("msg").innerText =
+            data.message || "Erro no login";
+
+
+        }
+
+
+
+    } catch(error){
+
+
+        console.error(
+            "ERRO LOGIN:",
+            error
+        );
+
+
+        document.getElementById("msg").innerText =
+        "Erro de conexão com servidor";
+
+
+    }
+
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

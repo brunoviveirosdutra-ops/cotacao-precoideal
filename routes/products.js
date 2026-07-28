@@ -4,14 +4,62 @@ import {
     getProducts,
     getProductById,
     createProduct,
-    deleteProduct
+    deleteProduct,
+    activateProduct
 } from "../controllers/productsController.js";
+
 
 const router = express.Router();
 
-router.get("/", getProducts);
-router.get("/:id", getProductById);
-router.post("/", createProduct);
-router.delete("/:id", deleteProduct);
+
+// ======================================================
+// LISTAR PRODUTOS
+// ======================================================
+
+router.get(
+    "/",
+    getProducts
+);
+
+
+// ======================================================
+// CADASTRAR PRODUTO
+// ======================================================
+
+router.post(
+    "/",
+    createProduct
+);
+
+
+// ======================================================
+// INATIVAR PRODUTO
+// ======================================================
+
+router.delete(
+    "/:id",
+    deleteProduct
+);
+
+
+// ======================================================
+// REATIVAR PRODUTO
+// ======================================================
+
+router.put(
+    "/activate/:id",
+    activateProduct
+);
+
+
+// ======================================================
+// BUSCAR PRODUTO POR ID
+// ======================================================
+
+router.get(
+    "/:id",
+    getProductById
+);
+
 
 export default router;

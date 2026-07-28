@@ -13,6 +13,10 @@ iniciarProdutos();
 
 
 
+// ======================================================
+// INICIAR
+// ======================================================
+
 async function iniciarProdutos(){
 
 
@@ -60,6 +64,7 @@ function configurarModalProduto(){
 
 
 
+
 // ======================================================
 // EVENTOS
 // ======================================================
@@ -72,6 +77,7 @@ function configurarEventosProduto(){
         document.getElementById(
             "btnNovoProduto"
         );
+
 
 
     if(btnNovo){
@@ -97,10 +103,12 @@ function configurarEventosProduto(){
 
 
 
+
     const btnSalvar =
         document.getElementById(
             "btnSalvarProduto"
         );
+
 
 
     if(btnSalvar){
@@ -116,6 +124,8 @@ function configurarEventosProduto(){
 
 
 }
+
+
 
 
 
@@ -137,8 +147,10 @@ async function carregarProdutos(){
             );
 
 
+
         const products =
             await response.json();
+
 
 
 
@@ -154,7 +166,11 @@ async function carregarProdutos(){
 
 
 
+
+
         tbody.innerHTML = "";
+
+
 
 
 
@@ -179,13 +195,16 @@ async function carregarProdutos(){
 
             return;
 
+
         }
 
 
 
 
 
+
         products.forEach(product=>{
+
 
 
             tbody.innerHTML += `
@@ -199,9 +218,11 @@ async function carregarProdutos(){
                     </td>
 
 
+
                     <td>
                         ${product.name}
                     </td>
+
 
 
                     <td>
@@ -209,40 +230,88 @@ async function carregarProdutos(){
                     </td>
 
 
+
                     <td>
                         ${product.unit}
                     </td>
 
 
+
+
                     <td>
 
-                        <span class="badge bg-success">
+
+                        <span class="badge ${
+                            product.status === "active"
+                            ? "bg-success"
+                            : "bg-secondary"
+                        }">
 
                             ${product.status}
 
                         </span>
 
+
                     </td>
+
+
 
 
 
                     <td>
 
 
-                        <button
 
-                            class="btn btn-danger btn-sm"
+                        ${
+                            product.status === "inactive"
 
-                            onclick="excluirProduto(${product.id})">
+                            ?
+
+                            `
+
+                            <button
+
+                                class="btn btn-success btn-sm"
+
+                                onclick="reativarProduto(${product.id})">
 
 
-                            Excluir
+                                Reativar
 
 
-                        </button>
+                            </button>
+
+
+                            `
+
+
+                            :
+
+
+                            `
+
+
+                            <button
+
+                                class="btn btn-danger btn-sm"
+
+                                onclick="excluirProduto(${product.id})">
+
+
+                                Inativar
+
+
+                            </button>
+
+
+                            `
+
+                        }
+
 
 
                     </td>
+
 
 
                 </tr>
@@ -252,6 +321,7 @@ async function carregarProdutos(){
 
 
         });
+
 
 
 
@@ -270,6 +340,7 @@ async function carregarProdutos(){
 
 
 
+
 // ======================================================
 // SALVAR PRODUTO
 // ======================================================
@@ -278,28 +349,38 @@ async function carregarProdutos(){
 async function salvarProduto(){
 
 
+
     const dados = {
 
 
+
         name:
+
             document.getElementById(
                 "productName"
             ).value,
 
 
+
         category:
+
             document.getElementById(
                 "productCategory"
             ).value,
 
 
+
         unit:
+
             document.getElementById(
                 "productUnit"
             ).value
 
 
+
     };
+
+
 
 
 
@@ -319,17 +400,22 @@ async function salvarProduto(){
 
 
 
+
+
     try{
 
 
         const response =
             await fetch(
+
                 "/api/products",
+
                 {
 
 
                     method:
                         "POST",
+
 
 
                     headers:{
@@ -342,17 +428,25 @@ async function salvarProduto(){
                     },
 
 
+
                     body:
+
                         JSON.stringify(dados)
 
 
                 }
+
             );
+
+
+
 
 
 
         const result =
             await response.json();
+
+
 
 
 
@@ -371,13 +465,20 @@ async function salvarProduto(){
 
 
 
+
+
+
         productModal.hide();
+
 
 
         limparProduto();
 
 
+
         carregarProdutos();
+
+
 
 
 
@@ -396,47 +497,195 @@ async function salvarProduto(){
 
 
 
+
+
 // ======================================================
-// EXCLUIR
+// INATIVAR PRODUTO
 // ======================================================
 
 
 async function excluirProduto(id){
 
 
+
     if(
         !confirm(
-            "Excluir produto?"
+            "Inativar produto?"
         )
     )
+
         return;
 
 
 
-    await fetch(
-
-        `/api/products/${id}`,
-
-        {
-
-            method:
-                "DELETE"
-
-        }
-
-    );
 
 
+    try{
 
-    carregarProdutos();
+
+        await fetch(
+
+            `/api/products/${id}`,
+
+            {
+
+
+                method:
+                    "DELETE",
+
+
+                credentials:
+                    "include"
+
+
+            }
+
+        );
+
+
+
+        carregarProdutos();
+
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+    }
+
 
 
 }
 
 
 
+
 window.excluirProduto =
     excluirProduto;
+
+
+
+
+
+
+
+// ======================================================
+// REATIVAR PRODUTO
+// ======================================================
+
+
+async function reativarProduto(id){
+
+
+
+    if(
+        !confirm(
+            "Reativar produto?"
+        )
+    )
+
+        return;
+
+
+
+
+
+
+
+    try{
+
+
+
+        const response =
+            await fetch(
+
+                `/api/products/activate/${id}`,
+
+                {
+
+
+                    method:
+                        "PUT",
+
+
+                    credentials:
+                        "include"
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+        const result =
+            await response.json();
+
+
+
+
+
+
+
+
+        if(!response.ok){
+
+
+            alert(
+                result.message ||
+                "Erro ao reativar produto."
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        carregarProdutos();
+
+
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+
+        alert(
+            "Erro ao reativar produto."
+        );
+
+
+    }
+
+
+
+}
+
+
+
+
+window.reativarProduto =
+    reativarProduto;
+
+
+
 
 
 
@@ -450,9 +699,11 @@ window.excluirProduto =
 function limparProduto(){
 
 
+
     document.getElementById(
         "productName"
     ).value = "";
+
 
 
 }

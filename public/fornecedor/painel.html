@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Painel Fornecedor</title>
+</head>
+
+<body>
+
+<h1>Painel do Fornecedor</h1>
+
+<p id="resultado">
+Carregando cotações...
+</p>
+
+
+<script>
+
+async function carregarCotacoes(){
+
+    const response = await fetch(
+    "/api/supplier/quotes",
+    {
+        method:"GET",
+        credentials:"include"
+    }
+);
+
+
+    const data = await response.json();
+
+
+    console.log(data);
+
+
+    if(data.success){
+
+        document.getElementById("resultado").innerHTML =
+        JSON.stringify(data, null, 2);
+
+    }else{
+
+        document.getElementById("resultado").innerHTML =
+        data.message;
+
+    }
+
+}
+
+
+carregarCotacoes();
+
+</script>
+
+
+</body>
+
+</html>

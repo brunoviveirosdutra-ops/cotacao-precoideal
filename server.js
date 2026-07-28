@@ -8,13 +8,24 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 
-// Inicializa variáveis de ambiente
+// ===================================================
+// AMBIENTE
+// ===================================================
+
 dotenv.config();
 
-// Inicializa o banco de dados
+
+// ===================================================
+// BANCO DE DADOS
+// ===================================================
+
 import "./database/init.js";
 
-// Rotas
+
+// ===================================================
+// ROTAS
+// ===================================================
+
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import quotesRoutes from "./routes/quotes.js";
@@ -23,134 +34,306 @@ import suppliersRoutes from "./routes/suppliers.js";
 import quotationsRouter from "./routes/quotations.js";
 import publicQuotationRouter from "./routes/publicQuotation.js";
 import supplierAnswersRouter from "./routes/supplierAnswers.js";
+import comparisonRoutes from "./routes/comparison.js";
+import supplierAuthRoutes from "./routes/supplierAuth.js";
+
+
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Corrige __dirname para ES Modules
+
+
+// ===================================================
+// __dirname ES MODULE
+// ===================================================
+
 const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
+
+
 
 // ===================================================
 // MIDDLEWARES
 // ===================================================
 
+
 app.use(
     helmet({
-        contentSecurityPolicy: false
+        contentSecurityPolicy:false
     })
 );
 
-app.use(cors());
+
+app.use(
+    cors({
+        origin:true,
+        credentials:true
+    })
+);
+
 
 app.use(compression());
 
+
 app.use(express.json());
+
 
 app.use(
     express.urlencoded({
-        extended: true
+        extended:true
     })
 );
+
+
 
 // ===================================================
 // SESSÃO
 // ===================================================
 
+
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "chave-temporaria-segura",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: false, // alterar para true quando usar HTTPS
-            maxAge: 1000 * 60 * 60 * 2 // 2 horas
+
+        secret:
+            process.env.SESSION_SECRET ||
+            "chave-temporaria-segura",
+
+        resave:false,
+
+        saveUninitialized:false,
+
+        name:"cotacao.sid",
+
+        cookie:{
+
+            httpOnly:false,
+
+            secure:false,
+
+            sameSite:"lax",
+
+            maxAge:1000 * 60 * 60 * 2
+
         }
+
     })
 );
 
-// ===================================================
-// ARQUIVOS ESTÁTICOS
-// ===================================================
 
-app.use(express.static(path.join(__dirname, "public")));
 
 // ===================================================
-// ROTA PRINCIPAL
+// ARQUIVOS PÚBLICOS
+// ===================================================
+
+
+app.use(
+    express.static(
+        path.join(__dirname,"public")
+    )
+);
+
+
+
+// ===================================================
+// API ROUTES
+// ===================================================
+
+
+// ADMIN LOGIN
+
+app.use(
+    "/api/auth",
+    authRoutes
+);
+
+
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
+
+
+app.use(
+    "/api/products",
+    productsRoutes
+);
+
+
+app.use(
+    "/api/quotes",
+    quotesRoutes
+);
+
+
+// FORNECEDORES ADMIN
+
+app.use(
+    "/api/suppliers",
+    suppliersRoutes
+);
+
+
+// ÁREA DO FORNECEDOR
+
+app.use(
+    "/api/supplier",
+    supplierAuthRoutes
+);
+
+
+// COTAÇÕES
+
+app.use(
+    "/api/quotations",
+    quotationsRouter
+);
+
+
+app.use(
+    "/api/public/quotation",
+    publicQuotationRouter
+);
+
+
+// RESPOSTAS
+
+app.use(
+    "/api/supplier-answer",
+    supplierAnswersRouter
+);
+
+
+// COMPARAÇÃO
+
+app.use(
+    "/api/comparison",
+    comparisonRoutes
+);
+
+
+
+// ===================================================
+// PÁGINA PRINCIPAL
 // ===================================================
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "admin",
+            "login.html"
+        )
+    );
+
 });
 
-
 // ===================================================
-// API
-// ===================================================
-
-app.use("/api/auth", authRoutes);
-
-app.use("/api/dashboard", dashboardRoutes);
-
-app.use("/api/quotes", quotesRoutes);
-
-app.use("/api/products", productsRoutes);
-
-app.use("/api/suppliers", suppliersRoutes);
-
-app.use("/api/quotations", quotationsRouter);
-
-app.use("/api/public/quotation", publicQuotationRouter);
-
-app.use("/api/supplier-answer", supplierAnswersRouter);
-// ===================================================
-// ROTA 404 API
+// API NÃO ENCONTRADA
 // ===================================================
 
-app.use((req, res, next) => {
 
-    if (req.originalUrl.startsWith("/api/")) {
+app.use(
+    (req,res)=>{
 
-        return res.status(404).json({
-            success: false,
-            message: "Rota API não encontrada."
-        });
+
+        if(
+            req.originalUrl.startsWith("/api/")
+        ){
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:
+                "Rota API não encontrada."
+
+            });
+
+        }
+
+
+        res.status(404).send(
+            "Página não encontrada"
+        );
+
 
     }
+);
 
-    next();
 
-});
-// ===================================================
-// TRATAMENTO DE ERROS
-// ===================================================
-
-app.use((err, req, res, next) => {
-
-    console.error("Erro:", err);
-
-    res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor."
-    });
-
-});
 
 // ===================================================
-// INICIAR SERVIDOR
+// ERROS
 // ===================================================
 
-app.listen(PORT, () => {
 
-    console.log("");
-    console.log("========================================");
-    console.log("🚀 Sistema Cotação Preço Ideal");
-    console.log("========================================");
-    console.log(`🌐 Servidor: http://localhost:${PORT}`);
-    console.log(`📂 Ambiente: ${process.env.NODE_ENV || "development"}`);
-    console.log("========================================");
-    console.log("");
+app.use(
+    (err,req,res,next)=>{
 
-});
+
+        console.error(
+            "Erro:",
+            err
+        );
+
+
+        res.status(500).json({
+
+            success:false,
+
+            message:
+            "Erro interno do servidor."
+
+        });
+
+
+    }
+);
+
+
+
+// ===================================================
+// SERVIDOR
+// ===================================================
+
+
+app.listen(
+    PORT,
+    ()=>{
+
+
+        console.log("");
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "🚀 Sistema Cotação Preço Ideal"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            `🌐 Servidor: http://localhost:${PORT}`
+        );
+
+        console.log(
+            `📂 Ambiente: ${process.env.NODE_ENV || "development"}`
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log("");
+
+    }
+);
