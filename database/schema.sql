@@ -1,7 +1,7 @@
 PRAGMA foreign_keys = ON;
 
 -- =====================================================
--- TABELA DE ADMINISTRADORES
+-- ADMINISTRADORES
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS admins (
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 -- =====================================================
--- TABELA DE FORNECEDORES
+-- FORNECEDORES
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS suppliers (
@@ -40,14 +40,9 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
     password TEXT NOT NULL,
 
-<<<<<<< HEAD
-    status TEXT NOT NULL DEFAULT 'active'
-        CHECK(status IN ('active','inactive')),
-=======
     status TEXT NOT NULL
         DEFAULT 'active'
         CHECK (status IN ('active','inactive')),
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -56,7 +51,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
 );
 
 -- =====================================================
--- TABELA DE PRODUTOS
+-- PRODUTOS
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS products (
@@ -67,14 +62,6 @@ CREATE TABLE IF NOT EXISTS products (
 
     category TEXT NOT NULL,
 
-<<<<<<< HEAD
-    unit TEXT NOT NULL DEFAULT 'kg',
-
-    description TEXT,
-
-    status TEXT NOT NULL DEFAULT 'active'
-        CHECK(status IN ('active','inactive')),
-=======
     unit TEXT NOT NULL
         DEFAULT 'kg'
         CHECK (unit IN ('kg','un','cx')),
@@ -84,7 +71,6 @@ CREATE TABLE IF NOT EXISTS products (
     status TEXT NOT NULL
         DEFAULT 'active'
         CHECK (status IN ('active','inactive')),
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -93,7 +79,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- =====================================================
--- TABELA DE COTAÇÕES
+-- COTAÇÕES
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS quotes (
@@ -106,24 +92,16 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     deadline DATETIME NOT NULL,
 
-<<<<<<< HEAD
-    status TEXT NOT NULL DEFAULT 'open'
-        CHECK(status IN ('open','closed','cancelled')),
-=======
     status TEXT NOT NULL
         DEFAULT 'open'
         CHECK (status IN ('open','closed','cancelled')),
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     created_by INTEGER,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-<<<<<<< HEAD
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-=======
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
     FOREIGN KEY (created_by)
         REFERENCES admins(id)
 
@@ -141,12 +119,7 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     product_id INTEGER NOT NULL,
 
-<<<<<<< HEAD
     quantity REAL NOT NULL DEFAULT 0,
-=======
-    quantity REAL NOT NULL
-        CHECK (quantity > 0),
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
 
     FOREIGN KEY (quote_id)
         REFERENCES quotes(id)
@@ -160,7 +133,7 @@ CREATE TABLE IF NOT EXISTS quote_items (
 );
 
 -- =====================================================
--- FORNECEDORES PARTICIPANTES
+-- FORNECEDORES DA COTAÇÃO
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS quote_suppliers (
@@ -171,15 +144,10 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
-<<<<<<< HEAD
     access_token TEXT NOT NULL UNIQUE,
 
     viewed INTEGER NOT NULL DEFAULT 0,
 
-=======
-    viewed INTEGER NOT NULL DEFAULT 0,
-
->>>>>>> 48f28ebbd44cbf54f199d5de2636e227dcc38a46
     answered INTEGER NOT NULL DEFAULT 0,
 
     answer_date DATETIME,
@@ -196,6 +164,7 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
     UNIQUE (quote_id, supplier_id)
 
 );
+
 -- =====================================================
 -- RESPOSTAS DOS FORNECEDORES
 -- =====================================================
@@ -208,8 +177,7 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     supplier_id INTEGER NOT NULL,
 
-    price REAL NOT NULL
-        CHECK (price > 0),
+    price REAL NOT NULL,
 
     observation TEXT,
 
@@ -239,6 +207,9 @@ ON suppliers(email);
 CREATE INDEX IF NOT EXISTS idx_products_name
 ON products(name);
 
+CREATE INDEX IF NOT EXISTS idx_products_category
+ON products(category);
+
 CREATE INDEX IF NOT EXISTS idx_quotes_status
 ON quotes(status);
 
@@ -262,9 +233,3 @@ ON supplier_answers(supplier_id);
 
 CREATE INDEX IF NOT EXISTS idx_supplier_answers_item
 ON supplier_answers(quote_item_id);
-
-CREATE INDEX IF NOT EXISTS idx_products_category
-ON products(category);
-
-CREATE INDEX IF NOT EXISTS idx_suppliers_status
-ON suppliers(status);

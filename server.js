@@ -6,24 +6,29 @@ import compression from "compression";
 import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// Banco
+import "./database/init.js";
+
+// Rotas
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import quotesRoutes from "./routes/quotes.js";
 import productsRoutes from "./routes/products.js";
 import suppliersRoutes from "./routes/suppliers.js";
-import "./database/init.js";
+import supplierAuthRoutes from "./routes/supplierAuth.js";
 
 dotenv.config();
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
-// Corrigir caminho das pastas
+// ============================
+// CAMINHOS
+// ============================
+
 const __filename = fileURLToPath(import.meta.url);
-
 const __dirname = path.dirname(__filename);
-
 
 // ============================
 // MIDDLEWARES
@@ -31,23 +36,31 @@ const __dirname = path.dirname(__filename);
 
 app.use(
     helmet({
-        contentSecurityPolicy:false
+        contentSecurityPolicy: false
     })
 );
 
-
-app.use(cors());
+app.use(
+    cors({
+        origin: true,
+        credentials: true
+    })
+);
 
 app.use(compression());
 
 app.use(express.json());
 
-app.use(express.urlencoded({ 
-    extended: true 
-}));
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
 
+// ============================
+// SESSÃO
+// ============================
 
-// Sessão
 app.use(
     session({
         secret: process.env.SESSION_SECRET || "chave-temporaria-segura",
@@ -56,36 +69,25 @@ app.use(
         cookie: {
             httpOnly: true,
             secure: false,
+            sameSite: "lax",
             maxAge: 1000 * 60 * 60 * 2
         }
-
     })
 );
 
+// ============================
+// ARQUIVOS PÚBLICOS
+// ============================
 
-// Arquivos públicos
 app.use(
     express.static(
-        path.join(__dirname,"public")
+        path.join(__dirname, "public")
     )
 );
 
-
-
 // ============================
-// ROTAS TESTE
+// ROTA INICIAL
 // ============================
-
-app.use(
-    "/api/auth",
-    authRoutes
-);
-
-app.use(
-    "/api/dashboard",
-    authMiddleware,
-    dashboardRoutes
-);
 
 app.get("/", (req, res) => {
 
@@ -96,21 +98,41 @@ app.get("/", (req, res) => {
 
 });
 
-app.use(
-    "/api/quotes",
-    authMiddleware,
-    quotesRoutes
-);
+// ============================
+// ROTAS
+// ============================
 
+// Login administrador
 app.use("/api/auth", authRoutes);
 
+// Portal do fornecedor
+app.use("/api/supplier", supplierAuthRoutes);
+
+// Dashboard
 app.use("/api/dashboard", dashboardRoutes);
 
+// Cotações
 app.use("/api/quotes", quotesRoutes);
 
+// Produtos
 app.use("/api/products", productsRoutes);
 
+// Fornecedores
 app.use("/api/suppliers", suppliersRoutes);
+
+// ============================
+// ROTA NÃO ENCONTRADA
+// ============================
+
+app.use((req, res) => {
+
+    res.status(404).json({
+        success: false,
+        message: "Rota não encontrada."
+    });
+
+});
+
 // ============================
 // INICIAR SERVIDOR
 // ============================
@@ -118,7 +140,7 @@ app.use("/api/suppliers", suppliersRoutes);
 app.listen(PORT, () => {
 
     console.log("--------------------------------");
-    console.log("🚀 Servidor iniciado");
+    console.log("🚀 Sistema Cotação Preço Ideal");
     console.log(`🌐 http://localhost:${PORT}`);
     console.log("--------------------------------");
 
