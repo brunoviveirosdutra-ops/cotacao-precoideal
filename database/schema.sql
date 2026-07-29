@@ -144,8 +144,6 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
-    access_token TEXT NOT NULL UNIQUE,
-
     viewed INTEGER NOT NULL DEFAULT 0,
 
     answered INTEGER NOT NULL DEFAULT 0,

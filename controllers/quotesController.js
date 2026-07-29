@@ -1,5 +1,4 @@
 import { getDatabase } from "../database/database.js";
-import crypto from "crypto";
 
 
 // ======================================================
@@ -28,7 +27,6 @@ export const getQuotes = async (req, res) => {
 
         res.json(quotes);
 
-
     } catch (error) {
 
         console.error(error);
@@ -43,7 +41,6 @@ export const getQuotes = async (req, res) => {
 };
 
 
-
 // ======================================================
 // BUSCAR COTAÇÃO POR ID
 // ======================================================
@@ -56,7 +53,6 @@ export const getQuoteById = async (req, res) => {
 
         const { id } = req.params;
 
-
         const quote = await db.get(
             `
             SELECT *
@@ -66,7 +62,6 @@ export const getQuoteById = async (req, res) => {
             [id]
         );
 
-
         if (!quote) {
 
             return res.status(404).json({
@@ -75,7 +70,6 @@ export const getQuoteById = async (req, res) => {
             });
 
         }
-
 
         const products = await db.all(
             `
@@ -91,7 +85,6 @@ export const getQuoteById = async (req, res) => {
             [id]
         );
 
-
         const suppliers = await db.all(
             `
             SELECT
@@ -106,7 +99,6 @@ export const getQuoteById = async (req, res) => {
             [id]
         );
 
-
         res.json({
 
             ...quote,
@@ -116,7 +108,6 @@ export const getQuoteById = async (req, res) => {
             suppliers
 
         });
-
 
     } catch (error) {
 
@@ -132,18 +123,15 @@ export const getQuoteById = async (req, res) => {
 };
 
 
-
 // ======================================================
-// CRIAR COTAÇÃO COMPLETA
+// CRIAR COTAÇÃO
 // ======================================================
 
 export const createQuote = async (req, res) => {
 
     const db = await getDatabase();
 
-
     try {
-
 
         const {
             title,
@@ -153,33 +141,21 @@ export const createQuote = async (req, res) => {
             suppliers
         } = req.body;
 
-
+        console.log("PRODUTOS RECEBIDOS:", products);
+console.log("FORNECEDORES RECEBIDOS:", suppliers);
 
         if (!title || !deadline) {
 
             return res.status(400).json({
-
                 success: false,
-
-                message:
-                    "Título e prazo são obrigatórios."
-
+                message: "Título e prazo são obrigatórios."
             });
 
         }
 
-
-
-        await db.run(
-            "BEGIN TRANSACTION"
-        );
-
-
-
-        // Criar cotação
+        await db.run("BEGIN TRANSACTION");
 
         const result = await db.run(
-
             `
             INSERT INTO quotes
             (
@@ -193,31 +169,22 @@ export const createQuote = async (req, res) => {
                 ?, ?, ?, 'open'
             )
             `,
-
             [
                 title,
                 description || "",
                 deadline
             ]
-
         );
-
-
 
         const quoteId = result.lastID;
 
-
-
-        // Inserir produtos
+        // Produtos
 
         if (Array.isArray(products)) {
 
-
             for (const product of products) {
 
-
                 await db.run(
-
                     `
                     INSERT INTO quote_items
                     (
@@ -230,69 +197,46 @@ export const createQuote = async (req, res) => {
                         ?, ?, ?
                     )
                     `,
-
                     [
                         quoteId,
                         product.product_id,
                         product.quantity
                     ]
-
                 );
-
 
             }
 
         }
 
-
-
-        // Inserir fornecedores COM TOKEN
+        // Fornecedores
 
         if (Array.isArray(suppliers)) {
 
-
             for (const supplierId of suppliers) {
 
-
-                const accessToken = crypto.randomUUID();
-
-
-
                 await db.run(
-
                     `
                     INSERT INTO quote_suppliers
                     (
                         quote_id,
-                        supplier_id,
-                        access_token
+                        supplier_id
                     )
                     VALUES
                     (
-                        ?, ?, ?
+                        ?, ?
                     )
                     `,
-
                     [
                         quoteId,
-                        supplierId,
-                        accessToken
+                        supplierId
                     ]
-
                 );
-
 
             }
 
         }
 
-
-
-        await db.run(
-            "COMMIT"
-        );
-
-
+        await db.run("COMMIT");
 
         res.status(201).json({
 
@@ -300,40 +244,27 @@ export const createQuote = async (req, res) => {
 
             id: quoteId,
 
-            message:
-                "Cotação criada com sucesso."
+            message: "Cotação criada com sucesso."
 
         });
 
-
-
     } catch (error) {
-
 
         console.error(error);
 
-
-
-        await db.run(
-            "ROLLBACK"
-        );
-
-
+        await db.run("ROLLBACK");
 
         res.status(500).json({
 
             success: false,
 
-            message:
-                "Erro ao criar cotação."
+            message: "Erro ao criar cotação."
 
         });
-
 
     }
 
 };
-
 
 
 // ======================================================
@@ -348,7 +279,6 @@ export const updateQuote = async (req, res) => {
 
         const { id } = req.params;
 
-
         const {
             title,
             description,
@@ -356,10 +286,7 @@ export const updateQuote = async (req, res) => {
             status
         } = req.body;
 
-
-
         await db.run(
-
             `
             UPDATE quotes
             SET
@@ -369,7 +296,6 @@ export const updateQuote = async (req, res) => {
                 status = ?
             WHERE id = ?
             `,
-
             [
                 title,
                 description,
@@ -377,40 +303,31 @@ export const updateQuote = async (req, res) => {
                 status,
                 id
             ]
-
         );
-
 
         res.json({
 
             success: true,
 
-            message:
-                "Cotação atualizada."
+            message: "Cotação atualizada."
 
         });
 
-
     } catch (error) {
 
-
         console.error(error);
-
 
         res.status(500).json({
 
             success: false,
 
-            message:
-                "Erro ao atualizar."
+            message: "Erro ao atualizar."
 
         });
-
 
     }
 
 };
-
 
 
 // ======================================================
@@ -425,41 +342,30 @@ export const deleteQuote = async (req, res) => {
 
         const { id } = req.params;
 
-
         await db.run(
-
             "DELETE FROM quotes WHERE id = ?",
-
             [id]
-
         );
-
 
         res.json({
 
             success: true,
 
-            message:
-                "Cotação excluída."
+            message: "Cotação excluída."
 
         });
 
-
     } catch (error) {
 
-
         console.error(error);
-
 
         res.status(500).json({
 
             success: false,
 
-            message:
-                "Erro ao excluir."
+            message: "Erro ao excluir."
 
         });
-
 
     }
 

@@ -435,9 +435,7 @@ async function carregarFornecedores() {
         );
 
 
-
     try {
-
 
 
         const response =
@@ -446,13 +444,37 @@ async function carregarFornecedores() {
             );
 
 
+        const data =
+            await response.json();
+
+
+        console.log(
+            "FORNECEDORES API:",
+            data
+        );
+
 
         const suppliers =
-            await response.json();
+            Array.isArray(data)
+                ? data
+                : data.suppliers;
 
 
 
         container.innerHTML = "";
+
+
+
+        if (!suppliers || suppliers.length === 0) {
+
+
+            container.innerHTML =
+                "Nenhum fornecedor encontrado.";
+
+
+            return;
+
+        }
 
 
 
@@ -498,7 +520,6 @@ async function carregarFornecedores() {
             `;
 
 
-
         });
 
 
@@ -506,7 +527,10 @@ async function carregarFornecedores() {
     } catch(error) {
 
 
-        console.error(error);
+        console.error(
+            "Erro fornecedores:",
+            error
+        );
 
 
         container.innerHTML =
@@ -514,14 +538,7 @@ async function carregarFornecedores() {
 
 
     }
-
-
 }
-
-
-
-
-
 // ======================================================
 // SALVAR COTAÇÃO
 // ======================================================

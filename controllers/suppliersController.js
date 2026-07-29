@@ -1,4 +1,4 @@
-   import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { getDatabase } from "../database/database.js";
 
 
@@ -12,9 +12,8 @@ export async function getSuppliers(req, res) {
 
         const db = await getDatabase();
 
-        const suppliers = await db.all(
-            `
-            SELECT 
+        const suppliers = await db.all(`
+            SELECT
                 id,
                 company_name,
                 cnpj,
@@ -25,29 +24,25 @@ export async function getSuppliers(req, res) {
                 created_at
             FROM suppliers
             ORDER BY id DESC
-            `
-        );
-
+        `);
 
         res.json({
-            success:true,
+            success: true,
             suppliers
         });
 
-
-    } catch(error) {
+    } catch (error) {
 
         console.error(error);
 
         res.status(500).json({
-            success:false,
-            message:"Erro ao buscar fornecedores"
+            success: false,
+            message: "Erro ao buscar fornecedores"
         });
 
     }
 
 }
-
 
 
 // =====================================
@@ -60,40 +55,33 @@ export async function getSupplierById(req, res) {
 
         const db = await getDatabase();
 
-
-        const supplier = await db.get(
-            `
+        const supplier = await db.get(`
             SELECT *
             FROM suppliers
             WHERE id = ?
-            `,
-            [req.params.id]
-        );
+        `, [req.params.id]);
 
-
-        if(!supplier){
+        if (!supplier) {
 
             return res.status(404).json({
-                success:false,
-                message:"Fornecedor não encontrado"
+                success: false,
+                message: "Fornecedor não encontrado"
             });
 
         }
 
-
         res.json({
-            success:true,
+            success: true,
             supplier
         });
 
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
         res.status(500).json({
-            success:false,
-            message:"Erro ao buscar fornecedor"
+            success: false,
+            message: "Erro ao buscar fornecedor"
         });
 
     }
@@ -101,18 +89,15 @@ export async function getSupplierById(req, res) {
 }
 
 
-
 // =====================================
 // CRIAR FORNECEDOR
 // =====================================
 
-export async function createSupplier(req,res){
+export async function createSupplier(req, res) {
 
     try {
 
-
         const db = await getDatabase();
-
 
         const {
             company_name,
@@ -123,25 +108,18 @@ export async function createSupplier(req,res){
             password
         } = req.body;
 
-
-
-        if(!company_name || !email || !password){
+        if (!company_name || !email || !password) {
 
             return res.status(400).json({
-                success:false,
-                message:"Nome, email e senha são obrigatórios"
+                success: false,
+                message: "Nome, email e senha são obrigatórios"
             });
 
         }
 
+        const passwordHash = await bcrypt.hash(password, 10);
 
-
-        const passwordHash = await bcrypt.hash(password,10);
-
-
-
-        const result = await db.run(
-            `
+        const result = await db.run(`
             INSERT INTO suppliers
             (
                 company_name,
@@ -152,96 +130,65 @@ export async function createSupplier(req,res){
                 password,
                 status
             )
-            VALUES (?,?,?,?,?,?,?)
-            `,
-            [
-                company_name,
-                cnpj || null,
-                contact_name || null,
-                email,
-                phone || null,
-                passwordHash,
-                "ativo"
-            ]
-        );
-
-
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+            company_name,
+            cnpj || null,
+            contact_name || null,
+            email,
+            phone || null,
+            passwordHash,
+            "active"
+        ]);
 
         res.json({
-
-            success:true,
-
-            message:"Fornecedor criado com sucesso",
-
+            success: true,
+            message: "Fornecedor criado com sucesso",
             id: result.lastID
-
         });
 
-
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
-
         res.status(500).json({
-
-            success:false,
-
-            message:"Erro ao criar fornecedor"
-
+            success: false,
+            message: "Erro ao criar fornecedor"
         });
 
     }
 
 }
-
-
-
 // =====================================
 // EXCLUIR FORNECEDOR
 // =====================================
 
-export async function deleteSupplier(req,res){
+export async function deleteSupplier(req, res) {
 
     try {
 
-
         const db = await getDatabase();
-
 
         await db.run(
             `
             DELETE FROM suppliers
             WHERE id = ?
             `,
-            [
-                req.params.id
-            ]
+            [req.params.id]
         );
 
-
         res.json({
-
-            success:true,
-
-            message:"Fornecedor excluído"
-
+            success: true,
+            message: "Fornecedor excluído"
         });
 
-
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
-
         res.status(500).json({
-
-            success:false,
-
-            message:"Erro ao excluir fornecedor"
-
+            success: false,
+            message: "Erro ao excluir fornecedor"
         });
 
     }
@@ -267,20 +214,14 @@ export async function supplierLogin(req, res) {
             password
         } = req.body;
 
-
         if (!email || !password) {
 
             return res.status(400).json({
-
-                success:false,
-
-                message:"Email e senha obrigatórios"
-
+                success: false,
+                message: "Email e senha obrigatórios"
             });
 
         }
-
-
 
         const supplier = await db.get(
             `
@@ -288,64 +229,43 @@ export async function supplierLogin(req, res) {
             FROM suppliers
             WHERE email = ?
             `,
-            [
-                email
-            ]
+            [email]
         );
-
-
 
         if (!supplier) {
 
             return res.status(401).json({
-
-                success:false,
-
-                message:"Fornecedor não encontrado"
-
+                success: false,
+                message: "Fornecedor não encontrado"
             });
 
         }
-
-
 
         const passwordOk = await bcrypt.compare(
             password,
             supplier.password
         );
 
-
-
         if (!passwordOk) {
 
             return res.status(401).json({
-
-                success:false,
-
-                message:"Senha inválida"
-
+                success: false,
+                message: "Senha inválida"
             });
 
         }
 
-
-
-        // CORREÇÃO DO STATUS
-        if (supplier.status !== "ativo") {
+        // VERIFICA SE O FORNECEDOR ESTÁ ATIVO
+        if (supplier.status !== "active") {
 
             return res.status(403).json({
-
-                success:false,
-
-                message:"Fornecedor inativo"
-
+                success: false,
+                message: "Fornecedor inativo"
             });
 
         }
 
-
-
-        // CRIAR SESSÃO
+        // CRIA A SESSÃO
 
         req.session.supplier = {
 
@@ -357,67 +277,53 @@ export async function supplierLogin(req, res) {
 
         };
 
-
-
         console.log(
             "LOGIN - SESSÃO CRIADA:",
             req.session
         );
 
+        // GARANTE QUE A SESSÃO FOI SALVA
 
+        req.session.save((err) => {
 
-        // GARANTIR GRAVAÇÃO DA SESSÃO
-
-        req.session.save((err)=>{
-
-
-            if(err){
+            if (err) {
 
                 console.error(
                     "ERRO AO SALVAR SESSÃO:",
                     err
                 );
 
-
                 return res.status(500).json({
-
-                    success:false,
-
-                    message:"Erro ao salvar sessão"
-
+                    success: false,
+                    message: "Erro ao salvar sessão"
                 });
 
             }
 
-console.log("LOGIN SESSION ID:", req.sessionID);
-console.log("LOGIN SESSION:", req.session);
+            console.log("LOGIN SESSION ID:", req.sessionID);
+            console.log("LOGIN SESSION:", req.session);
 
             res.json({
 
-                success:true,
+                success: true,
 
-                supplier:req.session.supplier
+                supplier: req.session.supplier
 
             });
 
-
         });
 
-
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
-
         res.status(500).json({
 
-            success:false,
+            success: false,
 
-            message:"Erro no login"
+            message: "Erro no login"
 
         });
-
 
     }
 

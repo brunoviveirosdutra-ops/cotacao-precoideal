@@ -1,98 +1,88 @@
+// ======================================================
+// ROTAS - RESPOSTAS DO FORNECEDOR
+// routes/supplierAnswers.js
+// ======================================================
+
+
 import express from "express";
 import { getDatabase } from "../database/database.js";
+
 
 const router = express.Router();
 
 
-/*
-    ENVIAR RESPOSTA DA COTAÇÃO
-*/
 
-router.post("/:token", async (req, res) => {
+// ======================================================
+// ENVIAR RESPOSTA DA COTAÇÃO
+// ======================================================
+
+
+router.post("/", async (req, res) => {
+
 
     try {
 
-        const db = await getDatabase();
 
-        const { token } = req.params;
+        // verificar fornecedor logado
+
+        if (!req.session.supplier) {
+
+
+            return res.status(401).json({
+
+                success:false,
+
+                message:"Fornecedor não autenticado."
+
+            });
+
+
+        }
+
+
+
+        const supplierId =
+            req.session.supplier.id;
+
+
+
+        const db =
+            await getDatabase();
+
 
 
         const {
-            answers = [],
-            observation = ""
+            answers = []
         } = req.body;
+
 
 
         if (!answers.length) {
 
+
             return res.status(400).json({
-
-                success: false,
-
-                message: "Nenhum produto informado."
-
-            });
-
-        }
-
-
-        const supplierQuote = await db.get(`
-
-            SELECT *
-
-            FROM quote_suppliers
-
-            WHERE access_token = ?
-
-        `, [
-
-            token
-
-        ]);
-
-
-        if (!supplierQuote) {
-
-            return res.status(404).json({
 
                 success:false,
 
-                message:"Token inválido."
+                message:"Nenhuma resposta enviada."
 
             });
 
+
         }
+
+
+
+        console.log(
+            "RESPOSTAS RECEBIDAS:",
+            answers
+        );
+
+
 
 
 
         for (const item of answers) {
-
-
-            const quoteItem = await db.get(`
-
-                SELECT id
-
-                FROM quote_items
-
-                WHERE quote_id = ?
-
-                AND product_id = ?
-
-            `, [
-
-                supplierQuote.quote_id,
-
-                item.product_id
-
-            ]);
-
-
-
-            if (!quoteItem) {
-
-                continue;
-
-            }
 
 
 
@@ -101,65 +91,46 @@ router.post("/:token", async (req, res) => {
                 INSERT INTO supplier_answers
 
                 (
-
                     quote_item_id,
-
                     supplier_id,
-
                     price,
-
                     observation
-
                 )
 
                 VALUES
 
                 (?, ?, ?, ?)
 
-                ON CONFLICT(quote_item_id, supplier_id)
+
+                ON CONFLICT(
+                    quote_item_id,
+                    supplier_id
+                )
 
                 DO UPDATE SET
 
                     price = excluded.price,
 
-                    observation = excluded.observation,
-
-                    created_at = CURRENT_TIMESTAMP
+                    observation = excluded.observation
 
 
             `, [
 
-                quoteItem.id,
+                item.quote_item_id,
 
-                supplierQuote.supplier_id,
+                supplierId,
 
                 item.price,
 
-                observation
+                item.observation || ""
 
             ]);
+
+
 
         }
 
 
-
-        await db.run(`
-
-            UPDATE quote_suppliers
-
-            SET
-
-                answered = 1,
-
-                answer_date = CURRENT_TIMESTAMP
-
-            WHERE access_token = ?
-
-        `, [
-
-            token
-
-        ]);
 
 
 
@@ -167,32 +138,46 @@ router.post("/:token", async (req, res) => {
 
             success:true,
 
-            message:"Cotação respondida com sucesso."
+            message:
+            "Cotação enviada com sucesso."
 
         });
+
+
 
 
 
     } catch(error) {
 
 
+
         console.error(
-            "ERRO RESPOSTA FORNECEDOR:",
+
+            "ERRO AO SALVAR RESPOSTA:",
             error
+
         );
+
 
 
         res.status(500).json({
 
             success:false,
 
-            message:"Erro ao enviar resposta."
+            message:
+            "Erro interno ao salvar resposta."
 
         });
 
+
+
     }
 
+
+
 });
+
+
 
 
 

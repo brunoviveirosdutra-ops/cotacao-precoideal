@@ -1,3 +1,9 @@
+// ======================================================
+// SERVER.JS
+// Sistema Cotação Preço Ideal
+// ======================================================
+
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -7,8 +13,10 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 
+
 // Banco
 import "./database/init.js";
+
 
 // Rotas
 import authRoutes from "./routes/auth.js";
@@ -16,132 +24,284 @@ import dashboardRoutes from "./routes/dashboard.js";
 import quotesRoutes from "./routes/quotes.js";
 import productsRoutes from "./routes/products.js";
 import suppliersRoutes from "./routes/suppliers.js";
+
 import supplierAuthRoutes from "./routes/supplierAuth.js";
+
+
+// NOVA ROTA
+import supplierAnswersRoutes from "./routes/supplierAnswers.js";
+
+
 
 dotenv.config();
 
+
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+const PORT =
+    process.env.PORT || 3000;
+
+
 
 // ============================
 // CAMINHOS
 // ============================
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+const __filename =
+    fileURLToPath(import.meta.url);
+
+
+const __dirname =
+    path.dirname(__filename);
+
+
+
 
 // ============================
 // MIDDLEWARES
 // ============================
 
+
 app.use(
     helmet({
-        contentSecurityPolicy: false
+        contentSecurityPolicy:false
     })
 );
+
+
 
 app.use(
     cors({
-        origin: true,
-        credentials: true
+        origin:true,
+        credentials:true
     })
 );
 
-app.use(compression());
 
-app.use(express.json());
+
+app.use(
+    compression()
+);
+
+
+
+app.use(
+    express.json()
+);
+
+
 
 app.use(
     express.urlencoded({
-        extended: true
+        extended:true
     })
 );
+
+
+
 
 // ============================
 // SESSÃO
 // ============================
 
+
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "chave-temporaria-segura",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 1000 * 60 * 60 * 2
+
+        secret:
+            process.env.SESSION_SECRET ||
+            "chave-temporaria-segura",
+
+
+        resave:false,
+
+
+        saveUninitialized:false,
+
+
+        cookie:{
+
+            httpOnly:true,
+
+            secure:false,
+
+            sameSite:"lax",
+
+            maxAge:
+                1000 * 60 * 60 * 2
+
         }
+
     })
 );
+
+
+
+
 
 // ============================
 // ARQUIVOS PÚBLICOS
 // ============================
 
+
 app.use(
     express.static(
-        path.join(__dirname, "public")
+        path.join(__dirname,"public")
     )
 );
 
+
+
+
 // ============================
-// ROTA INICIAL
+// HOME
 // ============================
 
-app.get("/", (req, res) => {
+
+app.get("/",(req,res)=>{
+
 
     res.send(`
+
         <h1>Sistema Cotação Preço Ideal</h1>
-        <p>Servidor funcionando com sucesso 🚀</p>
+
+        <p>Servidor funcionando 🚀</p>
+
     `);
 
+
 });
 
+
+
+
+
 // ============================
-// ROTAS
+// ROTAS API
 // ============================
 
-// Login administrador
-app.use("/api/auth", authRoutes);
 
-// Portal do fornecedor
-app.use("/api/supplier", supplierAuthRoutes);
+
+// Administrador
+
+app.use(
+    "/api/auth",
+    authRoutes
+);
+
+
+
+// Fornecedor login + cotações
+
+app.use(
+    "/api/supplier",
+    supplierAuthRoutes
+);
+
+
+
+// Respostas fornecedor
+
+app.use(
+    "/api/supplier-answer",
+    supplierAnswersRoutes
+);
+
+
 
 // Dashboard
-app.use("/api/dashboard", dashboardRoutes);
+
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
+
+
 
 // Cotações
-app.use("/api/quotes", quotesRoutes);
+
+app.use(
+    "/api/quotes",
+    quotesRoutes
+);
+
+
 
 // Produtos
-app.use("/api/products", productsRoutes);
+
+app.use(
+    "/api/products",
+    productsRoutes
+);
+
+
 
 // Fornecedores
-app.use("/api/suppliers", suppliersRoutes);
+
+app.use(
+    "/api/suppliers",
+    suppliersRoutes
+);
+
+
+
+
+
+
 
 // ============================
-// ROTA NÃO ENCONTRADA
+// ERRO 404
 // ============================
 
-app.use((req, res) => {
 
-    res.status(404).json({
-        success: false,
-        message: "Rota não encontrada."
-    });
+app.use(
+    (req,res)=>{
 
-});
+
+        res.status(404).json({
+
+            success:false,
+
+            message:"Rota não encontrada."
+
+        });
+
+
+    }
+);
+
+
+
+
+
+
 
 // ============================
-// INICIAR SERVIDOR
+// SERVIDOR
 // ============================
 
-app.listen(PORT, () => {
 
-    console.log("--------------------------------");
-    console.log("🚀 Sistema Cotação Preço Ideal");
-    console.log(`🌐 http://localhost:${PORT}`);
-    console.log("--------------------------------");
+app.listen(
+    PORT,
+    ()=>{
 
-});
+
+        console.log("--------------------------------");
+
+        console.log(
+            "🚀 Sistema Cotação Preço Ideal"
+        );
+
+
+        console.log(
+            `🌐 http://localhost:${PORT}`
+        );
+
+
+        console.log("--------------------------------");
+
+
+    }
+);

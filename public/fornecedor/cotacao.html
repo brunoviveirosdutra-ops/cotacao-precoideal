@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Responder Cotação</title>
+
+
+<style>
+
+body{
+    font-family: Arial;
+    padding:20px;
+}
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+th,td{
+
+    border:1px solid #ddd;
+    padding:10px;
+
+}
+
+
+input{
+
+    width:120px;
+    padding:5px;
+
+}
+
+
+button{
+
+    margin-top:20px;
+    padding:10px 20px;
+    background:#198754;
+    color:white;
+    border:0;
+    border-radius:5px;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<h1>Responder Cotação</h1>
+
+
+<div id="cotacao">
+
+Carregando produtos...
+
+</div>
+
+
+
+<button onclick="enviarResposta()">
+
+Enviar resposta
+
+</button>
+
+
+
+<script>
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const quoteId =
+    params.get("id");
+
+
+
+async function carregarProdutos(){
+
+
+    const response =
+        await fetch(
+            `/api/supplier/quotes/${quoteId}/items`,
+            {
+                credentials:"include"
+            }
+        );
+
+
+    const data =
+        await response.json();
+
+
+
+    console.log(
+        "ITENS:",
+        data
+    );
+
+
+
+    const div =
+        document.getElementById(
+            "cotacao"
+        );
+
+
+
+    if(!data.success){
+
+
+        div.innerHTML =
+            data.message;
+
+
+        return;
+
+    }
+
+
+
+
+   let html = `
+
+
+<table>
+
+
+<tr>
+
+    <th>Produto</th>
+
+    <th>Quantidade</th>
+
+    <th>Unidade</th>
+
+    <th>Preço</th>
+
+    <th>Observação</th>
+
+</tr>
+
+
+`;
+
+
+
+    data.items.forEach(item => {
+
+
+        html += `
+
+
+        <tr>
+
+
+            <td>
+           ${item.name} 
+            </td>
+
+
+           <td>
+    ${item.quantity}
+</td>
+
+
+<td>
+    ${item.unit}
+</td>
+
+
+<td>
+
+    <input
+    type="number"
+    step="0.01"
+    class="preco"
+    data-item="${item.id}"
+    >
+
+</td>
+
+
+
+            <td>
+
+                <input
+                type="text"
+                class="obs"
+                data-item="${item.id}"
+                >
+
+            </td>
+
+
+        </tr>
+
+
+        `;
+
+
+    });
+
+
+
+    html += "</table>";
+
+
+
+    div.innerHTML = html;
+
+
+
+}
+
+
+
+
+async function enviarResposta(){
+
+
+    const precos =
+        document.querySelectorAll(".preco");
+
+
+    const observacoes =
+        document.querySelectorAll(".obs");
+
+
+
+    const respostas = [];
+
+
+
+    precos.forEach(input => {
+
+
+        const itemId =
+            input.dataset.item;
+
+
+        const preco =
+            input.value;
+
+
+
+        const obs =
+            [...observacoes]
+            .find(
+                o => o.dataset.item == itemId
+            )
+            ?.value || "";
+
+
+
+        respostas.push({
+
+            quote_item_id: itemId,
+
+            price: Number(preco),
+
+            observation: obs
+
+        });
+
+
+    });
+
+
+
+    console.log(
+        "RESPOSTAS:",
+        respostas
+    );
+
+
+
+    const response =
+        await fetch(
+            "/api/supplier-answer",
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                credentials:"include",
+
+                body:JSON.stringify({
+
+                    answers: respostas
+
+                })
+
+            }
+        );
+
+
+
+    const data =
+        await response.json();
+
+
+
+    console.log(
+        "RETORNO:",
+        data
+    );
+
+
+
+    alert(
+        data.message || "Resposta enviada!"
+    );
+
+
+}
+
+
+
+carregarProdutos();
+
+
+</script>
+
+
+</body>
+
+</html>
