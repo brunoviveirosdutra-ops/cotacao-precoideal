@@ -32,13 +32,14 @@ export const getQuotes = async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            success: false,
-            message: "Erro ao listar cotações."
+            success:false,
+            message:"Erro ao listar cotações."
         });
 
     }
 
 };
+
 
 
 // ======================================================
@@ -53,6 +54,7 @@ export const getQuoteById = async (req, res) => {
 
         const { id } = req.params;
 
+
         const quote = await db.get(
             `
             SELECT *
@@ -62,14 +64,22 @@ export const getQuoteById = async (req, res) => {
             [id]
         );
 
+
         if (!quote) {
 
             return res.status(404).json({
-                success: false,
-                message: "Cotação não encontrada."
+
+                success:false,
+
+                message:"Cotação não encontrada."
+
             });
 
         }
+
+
+
+        // PRODUTOS DA COTAÇÃO
 
         const products = await db.all(
             `
@@ -77,27 +87,124 @@ export const getQuoteById = async (req, res) => {
                 qi.*,
                 p.name,
                 p.unit
+
             FROM quote_items qi
+
             INNER JOIN products p
                 ON p.id = qi.product_id
+
             WHERE qi.quote_id = ?
             `,
             [id]
         );
 
-        const suppliers = await db.all(
+
+
+ // FORNECEDORES DA COTAÇÃO COM STATUS DE RESPOSTA
+
+const suppliers = await db.all(
+    `
+    SELECT
+
+        qs.*,
+
+        s.company_name,
+
+        s.email,
+
+
+        CASE
+
+            WHEN EXISTS (
+
+                SELECT 1
+
+                FROM supplier_answers sa
+
+                INNER JOIN quote_items qi
+
+                    ON qi.id = sa.quote_item_id
+
+                WHERE sa.supplier_id = qs.supplier_id
+
+                AND qi.quote_id = qs.quote_id
+
+            )
+
+            THEN 'respondido'
+
+            ELSE 'aguardando'
+
+        END AS response_status
+
+
+    FROM quote_suppliers qs
+
+
+    INNER JOIN suppliers s
+
+        ON s.id = qs.supplier_id
+
+
+    WHERE qs.quote_id = ?
+
+    `,
+    [id]
+);
+
+
+
+
+        // RESPOSTAS DOS FORNECEDORES
+
+        const answers = await db.all(
             `
             SELECT
-                qs.*,
+
+                sa.id,
+
+                sa.quote_item_id,
+
+                sa.supplier_id,
+
+                sa.price,
+
+                sa.observation,
+
                 s.company_name,
-                s.email
-            FROM quote_suppliers qs
+
+                p.name AS product_name,
+
+                p.unit,
+
+                qi.quantity
+
+
+            FROM supplier_answers sa
+
+
+            INNER JOIN quote_items qi
+                ON qi.id = sa.quote_item_id
+
+
+            INNER JOIN products p
+                ON p.id = qi.product_id
+
+
             INNER JOIN suppliers s
-                ON s.id = qs.supplier_id
-            WHERE qs.quote_id = ?
+                ON s.id = sa.supplier_id
+
+
+            WHERE qi.quote_id = ?
+
+
+            ORDER BY sa.price ASC
+
             `,
             [id]
         );
+
+
 
         res.json({
 
@@ -105,33 +212,46 @@ export const getQuoteById = async (req, res) => {
 
             products,
 
-            suppliers
+            suppliers,
+
+            answers
 
         });
 
-    } catch (error) {
+
+
+    } catch(error) {
+
 
         console.error(error);
 
+
         res.status(500).json({
-            success: false,
-            message: "Erro ao buscar cotação."
+
+            success:false,
+
+            message:"Erro ao buscar cotação."
+
         });
+
 
     }
 
 };
 
 
+
+
 // ======================================================
 // CRIAR COTAÇÃO
 // ======================================================
 
-export const createQuote = async (req, res) => {
+export const createQuote = async (req,res)=>{
 
     const db = await getDatabase();
 
     try {
+
 
         const {
             title,
@@ -139,21 +259,43 @@ export const createQuote = async (req, res) => {
             deadline,
             products,
             suppliers
+
         } = req.body;
 
-        console.log("PRODUTOS RECEBIDOS:", products);
-console.log("FORNECEDORES RECEBIDOS:", suppliers);
 
-        if (!title || !deadline) {
+
+        console.log(
+            "PRODUTOS RECEBIDOS:",
+            products
+        );
+
+
+        console.log(
+            "FORNECEDORES RECEBIDOS:",
+            suppliers
+        );
+
+
+
+        if(!title || !deadline){
 
             return res.status(400).json({
-                success: false,
-                message: "Título e prazo são obrigatórios."
+
+                success:false,
+
+                message:"Título e prazo são obrigatórios."
+
             });
 
         }
 
-        await db.run("BEGIN TRANSACTION");
+
+
+        await db.run(
+            "BEGIN TRANSACTION"
+        );
+
+
 
         const result = await db.run(
             `
@@ -164,9 +306,10 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
                 deadline,
                 status
             )
+
             VALUES
             (
-                ?, ?, ?, 'open'
+                ?,?,?,'open'
             )
             `,
             [
@@ -176,13 +319,17 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
             ]
         );
 
+
+
         const quoteId = result.lastID;
 
-        // Produtos
 
-        if (Array.isArray(products)) {
 
-            for (const product of products) {
+        if(Array.isArray(products)){
+
+
+            for(const product of products){
+
 
                 await db.run(
                     `
@@ -192,9 +339,10 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
                         product_id,
                         quantity
                     )
+
                     VALUES
                     (
-                        ?, ?, ?
+                        ?,?,?
                     )
                     `,
                     [
@@ -204,15 +352,19 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
                     ]
                 );
 
+
             }
 
         }
 
-        // Fornecedores
 
-        if (Array.isArray(suppliers)) {
 
-            for (const supplierId of suppliers) {
+
+        if(Array.isArray(suppliers)){
+
+
+            for(const supplierId of suppliers){
+
 
                 await db.run(
                     `
@@ -221,9 +373,10 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
                         quote_id,
                         supplier_id
                     )
+
                     VALUES
                     (
-                        ?, ?
+                        ?,?
                     )
                     `,
                     [
@@ -232,69 +385,100 @@ console.log("FORNECEDORES RECEBIDOS:", suppliers);
                     ]
                 );
 
+
             }
 
         }
 
-        await db.run("COMMIT");
+
+
+
+        await db.run(
+            "COMMIT"
+        );
+
+
 
         res.status(201).json({
 
-            success: true,
+            success:true,
 
-            id: quoteId,
+            id:quoteId,
 
-            message: "Cotação criada com sucesso."
+            message:"Cotação criada com sucesso."
 
         });
 
-    } catch (error) {
+
+
+    } catch(error){
+
 
         console.error(error);
 
-        await db.run("ROLLBACK");
+
+        await db.run(
+            "ROLLBACK"
+        );
+
 
         res.status(500).json({
 
-            success: false,
+            success:false,
 
-            message: "Erro ao criar cotação."
+            message:"Erro ao criar cotação."
 
         });
+
 
     }
 
 };
 
 
+
 // ======================================================
 // ATUALIZAR COTAÇÃO
 // ======================================================
 
-export const updateQuote = async (req, res) => {
+export const updateQuote = async(req,res)=>{
 
-    try {
+
+    try{
+
 
         const db = await getDatabase();
 
-        const { id } = req.params;
+
+        const {id}=req.params;
+
 
         const {
             title,
             description,
             deadline,
             status
-        } = req.body;
+
+        }=req.body;
+
+
 
         await db.run(
             `
             UPDATE quotes
+
             SET
-                title = ?,
-                description = ?,
-                deadline = ?,
-                status = ?
-            WHERE id = ?
+
+                title=?,
+
+                description=?,
+
+                deadline=?,
+
+                status=?
+
+            WHERE id=?
+
             `,
             [
                 title,
@@ -305,68 +489,91 @@ export const updateQuote = async (req, res) => {
             ]
         );
 
+
+
         res.json({
 
-            success: true,
+            success:true,
 
-            message: "Cotação atualizada."
+            message:"Cotação atualizada."
 
         });
 
-    } catch (error) {
+
+
+    }catch(error){
+
 
         console.error(error);
 
+
         res.status(500).json({
 
-            success: false,
+            success:false,
 
-            message: "Erro ao atualizar."
+            message:"Erro ao atualizar."
 
         });
+
 
     }
 
 };
 
 
+
 // ======================================================
 // EXCLUIR COTAÇÃO
 // ======================================================
 
-export const deleteQuote = async (req, res) => {
+export const deleteQuote = async(req,res)=>{
 
-    try {
+
+    try{
+
 
         const db = await getDatabase();
 
-        const { id } = req.params;
+
+        const {id}=req.params;
+
+
 
         await db.run(
-            "DELETE FROM quotes WHERE id = ?",
+            "DELETE FROM quotes WHERE id=?",
             [id]
         );
 
+
+
         res.json({
 
-            success: true,
+            success:true,
 
-            message: "Cotação excluída."
+            message:"Cotação excluída."
 
         });
 
-    } catch (error) {
+
+
+    }catch(error){
+
 
         console.error(error);
 
+
+
         res.status(500).json({
 
-            success: false,
+            success:false,
 
-            message: "Erro ao excluir."
+            message:"Erro ao excluir."
 
         });
 
+
+
     }
+
 
 };

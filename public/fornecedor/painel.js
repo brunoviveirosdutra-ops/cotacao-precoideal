@@ -30,7 +30,10 @@ async function carregarCotacoesFornecedor(){
             await response.json();
 
             console.log("RESPOSTA COMPLETA:", data);
-console.log("ITEM:", data.items[0]);
+console.log(
+    "QUOTES:",
+    data.quotes
+);
 
         console.log(
             "COTAÇÕES FORNECEDOR:",

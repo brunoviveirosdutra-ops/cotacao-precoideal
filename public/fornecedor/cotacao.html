@@ -11,7 +11,7 @@
 <style>
 
 body{
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     padding:20px;
 }
 
@@ -48,6 +48,14 @@ button{
     color:white;
     border:0;
     border-radius:5px;
+    cursor:pointer;
+
+}
+
+
+button:hover{
+
+    opacity:0.9;
 
 }
 
@@ -80,6 +88,8 @@ Enviar resposta
 
 
 
+
+
 <script>
 
 
@@ -94,123 +104,101 @@ const quoteId =
 
 
 
+
+
 async function carregarProdutos(){
 
 
-    const response =
-        await fetch(
-            `/api/supplier/quotes/${quoteId}/items`,
-            {
-                credentials:"include"
-            }
+    try{
+
+
+        const response =
+            await fetch(
+                `/api/supplier/quotes/${quoteId}/items`,
+                {
+                    credentials:"include"
+                }
+            );
+
+
+
+        const data =
+            await response.json();
+
+
+
+        console.log(
+            "ITENS RECEBIDOS:",
+            data
         );
 
 
-    const data =
-        await response.json();
 
-
-
-    console.log(
-        "ITENS:",
-        data
-    );
-
-
-
-    const div =
-        document.getElementById(
-            "cotacao"
-        );
-
-
-
-    if(!data.success){
-
-
-        div.innerHTML =
-            data.message;
-
-
-        return;
-
-    }
+        const div =
+            document.getElementById(
+                "cotacao"
+            );
 
 
 
 
-   let html = `
+        if(!data.success){
 
 
-<table>
+            div.innerHTML =
+                `
+                <p>
+                ${data.message}
+                </p>
+                `;
 
 
-<tr>
+            return;
 
-    <th>Produto</th>
-
-    <th>Quantidade</th>
-
-    <th>Unidade</th>
-
-    <th>Preço</th>
-
-    <th>Observação</th>
-
-</tr>
-
-
-`;
+        }
 
 
 
-    data.items.forEach(item => {
 
 
-        html += `
+        if(!data.items || data.items.length === 0){
+
+
+            div.innerHTML =
+                `
+                <p>
+                Nenhum produto encontrado.
+                </p>
+                `;
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+        let html = `
+
+
+        <table>
 
 
         <tr>
 
+            <th>Produto</th>
 
-            <td>
-           ${item.name} 
-            </td>
+            <th>Quantidade</th>
 
+            <th>Unidade</th>
 
-           <td>
-    ${item.quantity}
-</td>
+            <th>Preço</th>
 
-
-<td>
-    ${item.unit}
-</td>
-
-
-<td>
-
-    <input
-    type="number"
-    step="0.01"
-    class="preco"
-    data-item="${item.id}"
-    >
-
-</td>
-
-
-
-            <td>
-
-                <input
-                type="text"
-                class="obs"
-                data-item="${item.id}"
-                >
-
-            </td>
-
+            <th>Observação</th>
 
         </tr>
 
@@ -218,19 +206,143 @@ async function carregarProdutos(){
         `;
 
 
-    });
 
 
 
-    html += "</table>";
+
+        data.items.forEach(item => {
 
 
 
-    div.innerHTML = html;
+            html += `
+
+
+            <tr>
+
+
+
+                <td>
+
+                    ${item.product}
+
+                </td>
+
+
+
+
+                <td>
+
+                    ${item.quantity}
+
+                </td>
+
+
+
+
+                <td>
+
+                    ${item.unit}
+
+                </td>
+
+
+
+
+                <td>
+
+
+                    <input
+
+                    type="number"
+
+                    step="0.01"
+
+                    min="0"
+
+                    class="preco"
+
+                    data-item="${item.id}"
+
+                    >
+
+
+                </td>
+
+
+
+
+
+
+                <td>
+
+
+                    <input
+
+                    type="text"
+
+                    class="obs"
+
+                    data-item="${item.id}"
+
+                    >
+
+
+                </td>
+
+
+
+
+            </tr>
+
+
+            `;
+
+
+
+        });
+
+
+
+
+
+        html += "</table>";
+
+
+
+        div.innerHTML =
+            html;
+
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "ERRO AO CARREGAR PRODUTOS:",
+            error
+        );
+
+
+        document.getElementById(
+            "cotacao"
+        ).innerHTML =
+        `
+        <p>
+        Erro ao carregar produtos.
+        </p>
+        `;
+
+
+    }
 
 
 
 }
+
+
+
+
 
 
 
@@ -238,12 +350,19 @@ async function carregarProdutos(){
 async function enviarResposta(){
 
 
+
     const precos =
-        document.querySelectorAll(".preco");
+        document.querySelectorAll(
+            ".preco"
+        );
+
 
 
     const observacoes =
-        document.querySelectorAll(".obs");
+        document.querySelectorAll(
+            ".obs"
+        );
+
 
 
 
@@ -251,95 +370,206 @@ async function enviarResposta(){
 
 
 
+
+
     precos.forEach(input => {
+
 
 
         const itemId =
             input.dataset.item;
 
 
+
+
         const preco =
-            input.value;
+            Number(
+                input.value
+            );
+
+
 
 
 
         const obs =
             [...observacoes]
             .find(
-                o => o.dataset.item == itemId
+                o =>
+                o.dataset.item == itemId
             )
             ?.value || "";
 
 
 
-        respostas.push({
 
-            quote_item_id: itemId,
 
-            price: Number(preco),
 
-            observation: obs
+        if(preco > 0){
 
-        });
+
+            respostas.push({
+
+
+                quote_item_id:
+                    itemId,
+
+
+                price:
+                    preco,
+
+
+                observation:
+                    obs
+
+
+            });
+
+
+        }
+
 
 
     });
 
 
 
+
+
+
+    if(respostas.length === 0){
+
+
+        alert(
+            "Informe pelo menos um preço."
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
     console.log(
-        "RESPOSTAS:",
+        "RESPOSTAS ENVIADAS:",
         respostas
     );
 
 
 
-    const response =
-        await fetch(
-            "/api/supplier-answer",
-            {
 
-                method:"POST",
 
-                headers:{
-                    "Content-Type":"application/json"
-                },
 
-                credentials:"include",
+    try{
 
-                body:JSON.stringify({
 
-                    answers: respostas
 
-                })
+        const response =
+            await fetch(
 
-            }
+                "/api/supplier-answer",
+
+                {
+
+
+                    method:"POST",
+
+
+                    headers:{
+
+
+                        "Content-Type":
+                        "application/json"
+
+
+                    },
+
+
+                    credentials:"include",
+
+
+
+                    body:
+                    JSON.stringify({
+
+                        answers:
+                            respostas
+
+                    })
+
+
+                }
+
+            );
+
+
+
+
+
+
+        const data =
+            await response.json();
+
+
+
+
+
+
+        console.log(
+            "RETORNO:",
+            data
         );
 
 
 
-    const data =
-        await response.json();
 
 
 
-    console.log(
-        "RETORNO:",
-        data
-    );
+        alert(
+
+            data.message ||
+            "Resposta enviada!"
+
+        );
 
 
 
-    alert(
-        data.message || "Resposta enviada!"
-    );
+
+
+
+    }
+    catch(error){
+
+
+
+        console.error(
+            "ERRO AO ENVIAR:",
+            error
+        );
+
+
+        alert(
+            "Erro ao enviar resposta."
+        );
+
+
+    }
+
 
 
 }
 
 
 
+
+
+
 carregarProdutos();
+
 
 
 </script>

@@ -49,6 +49,45 @@ router.post("/", async (req, res) => {
         const db =
             await getDatabase();
 
+            const quote = await db.get(
+    `
+    SELECT q.status
+
+    FROM quotes q
+
+    INNER JOIN quote_items qi
+
+        ON qi.quote_id = q.id
+
+    WHERE qi.id = ?
+
+    `,
+    [answers[0]?.quote_item_id]
+);
+
+if (!quote) {
+
+    return res.status(404).json({
+
+        success: false,
+
+        message: "Cotação não encontrada."
+
+    });
+
+}
+
+if (quote.status === "closed") {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message: "Esta cotação já foi encerrada."
+
+    });
+
+}
 
 
         const {
@@ -132,6 +171,60 @@ router.post("/", async (req, res) => {
 
 
 
+        // ======================================================
+        // ATUALIZAR STATUS DO FORNECEDOR NA COTAÇÃO
+        // ======================================================
+
+
+        await db.run(
+
+            `
+
+            UPDATE quote_suppliers
+
+            SET
+
+                answered = 1,
+
+                answer_date = datetime('now')
+
+
+            WHERE
+
+                supplier_id = ?
+
+            AND quote_id IN (
+
+                SELECT
+
+                    qi.quote_id
+
+                FROM quote_items qi
+
+
+                INNER JOIN supplier_answers sa
+
+                    ON sa.quote_item_id = qi.id
+
+
+                WHERE sa.supplier_id = ?
+
+            )
+
+            `,
+
+            [
+
+                supplierId,
+
+                supplierId
+
+            ]
+
+        );
+
+
+
 
 
         res.json({
@@ -142,6 +235,7 @@ router.post("/", async (req, res) => {
             "Cotação enviada com sucesso."
 
         });
+
 
 
 
@@ -176,6 +270,7 @@ router.post("/", async (req, res) => {
 
 
 });
+
 
 
 

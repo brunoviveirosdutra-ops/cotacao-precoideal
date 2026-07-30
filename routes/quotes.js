@@ -64,4 +64,50 @@ router.delete(
     deleteQuote
 );
 
+// ======================================================
+// ENCERRAR COTAÇÃO
+// POST /api/quotes/:id/close
+// ======================================================
+
+router.post("/:id/close", async (req, res) => {
+
+    try {
+
+        const db = await getDatabase();
+
+        await db.run(
+            `
+            UPDATE quotes
+            SET
+                status = 'closed',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            `,
+            [req.params.id]
+        );
+
+        res.json({
+
+            success: true,
+
+            message: "Cotação encerrada com sucesso."
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: "Erro ao encerrar cotação."
+
+        });
+
+    }
+
+});
+
 export default router;
