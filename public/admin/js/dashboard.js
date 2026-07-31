@@ -6,15 +6,17 @@ async function carregarDashboard() {
 
         const dados = await resposta.json();
 
-        const fornecedores = document.getElementById("fornecedores");
-        const produtos = document.getElementById("produtos");
-        const cotacoes = document.getElementById("cotacoes");
-        const respostas = document.getElementById("respostas");
+        document.getElementById("totalSuppliers").textContent =
+            dados.fornecedores;
 
-        if (fornecedores) fornecedores.textContent = dados.fornecedores;
-        if (produtos) produtos.textContent = dados.produtos;
-        if (cotacoes) cotacoes.textContent = dados.cotacoes;
-        if (respostas) respostas.textContent = dados.respostas;
+        document.getElementById("totalProducts").textContent =
+            dados.produtos;
+
+        document.getElementById("totalQuotes").textContent =
+            dados.cotacoes;
+
+        document.getElementById("totalAnswers").textContent =
+            dados.respostas;
 
     } catch (erro) {
 

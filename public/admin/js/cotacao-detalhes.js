@@ -70,6 +70,21 @@ mostrarRespostas(
     cotacao.answers || []
 );
 
+// ======================================================
+// BOTÃO EXPORTAR EXCEL
+// ======================================================
+
+const btnExcel =
+document.getElementById(
+    "btnExportarExcel"
+);
+
+if(btnExcel){
+
+    btnExcel.href =
+    `/api/quotes/${id}/export`;
+
+}
 
 
     }
@@ -120,7 +135,11 @@ function mostrarCabecalho(cotacao){
 
         <p>
             <strong>Status:</strong>
-            ${cotacao.status}
+${
+    cotacao.status === "open"
+        ? "🟢 Aberta"
+        : "🔒 Encerrada"
+}
         </p>
 
 
@@ -520,7 +539,8 @@ if(btnEncerrar){
                     carregarCotacaoDetalhes();
 
                 }
-
+                btnEncerrar.disabled = true;
+btnEncerrar.innerText = "Cotação Encerrada";
             }
             catch(error){
 

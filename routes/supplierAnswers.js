@@ -3,145 +3,136 @@
 // routes/supplierAnswers.js
 // ======================================================
 
-
 import express from "express";
 import { getDatabase } from "../database/database.js";
 
-
 const router = express.Router();
-
 
 
 // ======================================================
 // ENVIAR RESPOSTA DA COTAÇÃO
 // ======================================================
 
-
 router.post("/", async (req, res) => {
-
 
     try {
 
-
-        // verificar fornecedor logado
-
+        // Verificar fornecedor logado
         if (!req.session.supplier) {
-
 
             return res.status(401).json({
 
-                success:false,
+                success: false,
 
-                message:"Fornecedor não autenticado."
+                message: "Fornecedor não autenticado."
 
             });
 
-
         }
 
+        const supplierId = req.session.supplier.id;
+
+        const db = await getDatabase();
 
 
-        const supplierId =
-            req.session.supplier.id;
+        // ======================================================
+        // RESPOSTAS RECEBIDAS
+        // ======================================================
 
-
-
-        const db =
-            await getDatabase();
-
-            const quote = await db.get(
-    `
-    SELECT q.status
-
-    FROM quotes q
-
-    INNER JOIN quote_items qi
-
-        ON qi.quote_id = q.id
-
-    WHERE qi.id = ?
-
-    `,
-    [answers[0]?.quote_item_id]
-);
-
-if (!quote) {
-
-    return res.status(404).json({
-
-        success: false,
-
-        message: "Cotação não encontrada."
-
-    });
-
-}
-
-if (quote.status === "closed") {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message: "Esta cotação já foi encerrada."
-
-    });
-
-}
-
-
-        const {
-            answers = []
-        } = req.body;
-
-
+        const { answers = [] } = req.body;
 
         if (!answers.length) {
 
-
             return res.status(400).json({
 
-                success:false,
+                success: false,
 
-                message:"Nenhuma resposta enviada."
+                message: "Nenhuma resposta enviada."
 
             });
-
 
         }
 
 
+        // ======================================================
+        // VERIFICAR STATUS DA COTAÇÃO
+        // ======================================================
 
-        console.log(
-            "RESPOSTAS RECEBIDAS:",
-            answers
+        const quote = await db.get(
+
+            `
+            SELECT q.id, q.status
+
+            FROM quotes q
+
+            INNER JOIN quote_items qi
+
+                ON qi.quote_id = q.id
+
+            WHERE qi.id = ?
+            `,
+
+            [answers[0].quote_item_id]
+
         );
 
 
+        if (!quote) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Cotação não encontrada."
+
+            });
+
+        }
 
 
+        if (quote.status === "closed") {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Esta cotação já foi encerrada."
+
+            });
+
+        }
+
+
+        console.log(
+
+            "RESPOSTAS RECEBIDAS:",
+
+            answers
+
+        );
+
+
+        // ======================================================
+        // SALVAR RESPOSTAS
+        // ======================================================
 
         for (const item of answers) {
 
+            await db.run(
 
-
-            await db.run(`
-
+                `
                 INSERT INTO supplier_answers
-
                 (
                     quote_item_id,
                     supplier_id,
                     price,
                     observation
                 )
-
                 VALUES
-
                 (?, ?, ?, ?)
 
-
-                ON CONFLICT(
+                ON CONFLICT
+                (
                     quote_item_id,
                     supplier_id
                 )
@@ -151,35 +142,32 @@ if (quote.status === "closed") {
                     price = excluded.price,
 
                     observation = excluded.observation
+                `,
 
+                [
 
-            `, [
+                    item.quote_item_id,
 
-                item.quote_item_id,
+                    supplierId,
 
-                supplierId,
+                    item.price,
 
-                item.price,
+                    item.observation || ""
 
-                item.observation || ""
+                ]
 
-            ]);
-
-
+            );
 
         }
 
 
-
         // ======================================================
-        // ATUALIZAR STATUS DO FORNECEDOR NA COTAÇÃO
+        // ATUALIZAR STATUS DO FORNECEDOR
         // ======================================================
-
 
         await db.run(
 
             `
-
             UPDATE quote_suppliers
 
             SET
@@ -188,92 +176,58 @@ if (quote.status === "closed") {
 
                 answer_date = datetime('now')
 
-
             WHERE
 
                 supplier_id = ?
 
-            AND quote_id IN (
-
-                SELECT
-
-                    qi.quote_id
-
-                FROM quote_items qi
-
-
-                INNER JOIN supplier_answers sa
-
-                    ON sa.quote_item_id = qi.id
-
-
-                WHERE sa.supplier_id = ?
-
-            )
-
+            AND quote_id = ?
             `,
 
             [
 
                 supplierId,
 
-                supplierId
+                quote.id
 
             ]
 
         );
 
 
-
-
+        // ======================================================
+        // SUCESSO
+        // ======================================================
 
         res.json({
 
-            success:true,
+            success: true,
 
-            message:
-            "Cotação enviada com sucesso."
+            message: "Cotação enviada com sucesso."
 
         });
 
+    }
 
-
-
-
-
-    } catch(error) {
-
-
+    catch (error) {
 
         console.error(
 
             "ERRO AO SALVAR RESPOSTA:",
+
             error
 
         );
 
-
-
         res.status(500).json({
 
-            success:false,
+            success: false,
 
-            message:
-            "Erro interno ao salvar resposta."
+            message: "Erro interno ao salvar resposta."
 
         });
 
-
-
     }
 
-
-
 });
-
-
-
-
-
 
 export default router;
