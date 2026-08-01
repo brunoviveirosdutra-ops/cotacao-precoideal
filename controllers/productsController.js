@@ -270,7 +270,6 @@ export const activateProduct = async (req, res) => {
 
         const { id } = req.params;
 
-
         // Verifica se o produto existe
         const product = await db.get(
             `
@@ -281,7 +280,6 @@ export const activateProduct = async (req, res) => {
             [id]
         );
 
-
         if (!product) {
 
             return res.status(404).json({
@@ -291,56 +289,32 @@ export const activateProduct = async (req, res) => {
 
         }
 
-
-        // Verifica se o produto já está inativo
-        if (product.status === "inactive") {
+        // Se já está ativo, rejeita
+        if (product.status === "active") {
 
             return res.status(400).json({
                 success: false,
-                message: "Este produto já está desativado."
+                message: "Este produto já está ativado."
             });
 
         }
 
-
-        /*
-            Não vamos excluir o produto.
-            Apenas mudamos o status para inactive.
-
-            Isso mantém:
-            - histórico das cotações
-            - respostas dos fornecedores
-            - relatórios antigos
-        */
-
+        // Reativar produto (muda status para 'active')
         await db.run(
-
-            "DELETE FROM products WHERE id=?",
-
-            [req.params.id]
-
+            `UPDATE products SET status = 'active' WHERE id = ?`,
+            [id]
         );
 
         res.json({
-
-            success: true
-
+            success: true,
+            message: "Produto reativado com sucesso."
         });
-
 
     } catch (error) {
-
-
-        console.error("Erro ao desativar produto:", error);
-
-
+        console.error("Erro ao reativar produto:", error);
         res.status(500).json({
-
-            success: false
-
+            success: false,
+            message: "Erro ao reativar produto."
         });
-
-
     }
-
 };
