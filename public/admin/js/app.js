@@ -172,81 +172,56 @@ const App = {
     },
 
 
-    // ======================================================
-    // CARREGAMENTO CORRETO DOS SCRIPTS
-    // ======================================================
+   // ======================================================
+// CARREGAR SCRIPT DA PÁGINA
+// ======================================================
 
-    async loadScript(page) {
+async loadScript(page) {
 
+    return new Promise((resolve) => {
 
-        return new Promise((resolve) => {
+        // Remove script antigo
+        const antigo = document.getElementById("dynamic-script");
 
+        if (antigo) {
+            antigo.remove();
+        }
 
-            const antigo =
-                document.getElementById(
-                    "dynamic-script"
-                );
+        // Remove variáveis globais dos módulos
+        if (page === "produtos") {
+            window.produtosModuloCarregado = false;
+        }
 
+        if (page === "fornecedores") {
+            window.fornecedoresModuloCarregado = false;
+        }
 
-            if (antigo) {
+        const script = document.createElement("script");
 
-                antigo.remove();
+        script.id = "dynamic-script";
+        script.src = `/admin/js/${page}.js?${Date.now()}`;
 
-            }
+        script.onload = () => {
 
+            console.log(`✅ Script ${page}.js carregado`);
 
+            resolve();
 
-            const script =
-                document.createElement(
-                    "script"
-                );
+        };
 
+        script.onerror = (erro) => {
 
+            console.error(`❌ Erro ao carregar ${page}.js`, erro);
 
-            script.id =
-                "dynamic-script";
+            resolve();
 
+        };
 
+        document.body.appendChild(script);
 
-            script.src =
-                `/admin/js/${page}.js?v=${Date.now()}`;
+    });
 
-
-
-            script.onload = () => {
-
-                resolve();
-
-            };
-
-
-
-            script.onerror = () => {
-
-
-                console.error(
-
-                    "Erro carregando script:",
-                    `/admin/js/${page}.js`
-
-                );
-
-
-                resolve();
-
-
-            };
-
-
-
-            document.body.appendChild(script);
-
-
-
-        });
-
-
-    },
+},
 
 
     // ======================================================

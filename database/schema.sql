@@ -119,8 +119,12 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     product_id INTEGER NOT NULL,
 
+<<<<<<< HEAD
     quantity REAL NOT NULL
         CHECK (quantity > 0),
+=======
+    quantity REAL NOT NULL DEFAULT 0,
+>>>>>>> 301d3af6cee9f48444e63e22481ffac5feafb0f9
 
     FOREIGN KEY (quote_id)
         REFERENCES quotes(id)
@@ -145,8 +149,11 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
+<<<<<<< HEAD
     access_token TEXT UNIQUE,
 
+=======
+>>>>>>> 301d3af6cee9f48444e63e22481ffac5feafb0f9
     viewed INTEGER NOT NULL DEFAULT 0,
 
     answered INTEGER NOT NULL DEFAULT 0,
@@ -178,8 +185,7 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     supplier_id INTEGER NOT NULL,
 
-    price REAL NOT NULL
-        CHECK (price > 0),
+    price REAL NOT NULL,
 
     observation TEXT,
 

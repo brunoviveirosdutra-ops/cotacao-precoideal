@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Detalhes da Cotação</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    padding:30px;
+    background:#f5f5f5;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px #ccc;
+}
+
+.cabecalho{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+h1{
+    margin:0;
+}
+
+h2{
+    margin-top:0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#eee;
+}
+
+td,th{
+    padding:10px;
+    border:1px solid #ddd;
+}
+
+.btn{
+    display:inline-block;
+    padding:10px 15px;
+    color:white;
+    text-decoration:none;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.btn-voltar{
+    background:#333;
+}
+
+.btn-success{
+    background:#198754;
+}
+
+.btn-danger{
+    background:#dc3545;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="cabecalho">
+
+        <h1>Detalhes da Cotação</h1>
+
+        <div>
+
+            <a
+                id="btnExportarExcel"
+                class="btn btn-success"
+                style="margin-right:10px;">
+
+                📄 Exportar Excel
+
+            </a>
+
+            <button
+                id="btnEncerrarCotacao"
+                class="btn btn-danger">
+
+                🔒 Encerrar Cotação
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <a
+        class="btn btn-voltar"
+        href="cotacoes.html">
+
+        ← Voltar para Cotações
+
+    </a>
+
+    <br><br>
+
+    <div class="card">
+
+        <h2>Informações</h2>
+
+        <div id="dadosCotacao">
+
+            Carregando...
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Produtos</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Unidade</th>
+                    <th>Resposta</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="listaProdutos">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Fornecedores</h2>
+
+        <ul id="listaFornecedores">
+
+        </ul>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Respostas dos Fornecedores</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Produto</th>
+                    <th>Fornecedor</th>
+                    <th>Quantidade</th>
+                    <th>Preço</th>
+                    <th>Observação</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="listaRespostas">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="/admin/js/cotacao-detalhes.js"></script>
+
+</body>
+</html>

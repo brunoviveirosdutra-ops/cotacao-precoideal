@@ -7,11 +7,13 @@ import { getDatabase } from "../database/database.js";
 
 export async function getSupplierQuotes(req, res) {
 
-console.log("COOKIE RECEBIDO:", req.headers.cookie);
-console.log("SESSION ID:", req.sessionID);
-console.log("SESSION:", req.session);
+    console.log("COOKIE RECEBIDO:", req.headers.cookie);
+    console.log("SESSION ID:", req.sessionID);
+    console.log("SESSION:", req.session);
+
 
     try {
+
 
         if (!req.session.supplier) {
 
@@ -29,6 +31,7 @@ console.log("SESSION:", req.session);
         const db = await getDatabase();
 
 
+
         const quotes = await db.all(
             `
             SELECT
@@ -38,16 +41,21 @@ console.log("SESSION:", req.session);
                 q.description,
                 q.deadline,
                 q.status,
+
                 qs.viewed,
                 qs.answered,
                 qs.created_at
 
+
             FROM quote_suppliers qs
+
 
             INNER JOIN quotes q
                 ON q.id = qs.quote_id
 
+
             WHERE qs.supplier_id = ?
+
 
             ORDER BY q.created_at DESC
 
@@ -56,6 +64,12 @@ console.log("SESSION:", req.session);
                 supplierId
             ]
         );
+
+
+
+        console.log("COTAÇÕES DO FORNECEDOR:");
+        console.log(quotes);
+
 
 
         res.json({
@@ -67,10 +81,14 @@ console.log("SESSION:", req.session);
         });
 
 
+
     } catch(error) {
 
 
-        console.error(error);
+        console.error(
+            "ERRO GET SUPPLIER QUOTES:",
+            error
+        );
 
 
         res.status(500).json({
@@ -86,49 +104,78 @@ console.log("SESSION:", req.session);
 
 }
 
+
+
+
+
 // =====================================
 // PRODUTOS DE UMA COTAÇÃO
 // =====================================
 
 export async function getSupplierQuoteItems(req, res) {
 
+
     try {
+
 
         if (!req.session.supplier) {
 
+
             return res.status(401).json({
+
                 success:false,
+
                 message:"Fornecedor não autenticado"
+
             });
+
 
         }
 
 
+
         const supplierId = req.session.supplier.id;
 
+
         const quoteId = req.params.id;
+
 
 
         const db = await getDatabase();
 
 
+
+
         // verifica se a cotação pertence ao fornecedor
 
         const quoteSupplier = await db.get(
+
             `
             SELECT *
+
             FROM quote_suppliers
+
             WHERE quote_id = ?
+
             AND supplier_id = ?
+
             `,
+
             [
+
                 quoteId,
+
                 supplierId
+
             ]
+
         );
 
 
+
+
         if (!quoteSupplier) {
+
 
             return res.status(403).json({
 
@@ -138,31 +185,61 @@ export async function getSupplierQuoteItems(req, res) {
 
             });
 
+
         }
 
 
 
+
+
+
         const items = await db.all(
+
             `
             SELECT
 
                 qi.id,
-                p.name,
+
+                p.name AS product,
+
                 p.unit,
+
                 qi.quantity
+
 
             FROM quote_items qi
 
+
+
             INNER JOIN products p
+
                 ON p.id = qi.product_id
+
+
 
             WHERE qi.quote_id = ?
 
+
+
             `,
+
             [
+
                 quoteId
+
             ]
+
         );
+
+
+
+
+
+        console.log("PRODUTOS DA COTAÇÃO:");
+        console.log(items);
+
+
+
 
 
         res.json({
@@ -175,10 +252,21 @@ export async function getSupplierQuoteItems(req, res) {
 
 
 
+
+
+
     } catch(error) {
 
 
-        console.error(error);
+
+        console.error(
+
+            "ERRO GET SUPPLIER ITEMS:",
+
+            error
+
+        );
+
 
 
         res.status(500).json({
@@ -190,6 +278,8 @@ export async function getSupplierQuoteItems(req, res) {
         });
 
 
+
     }
+
 
 }

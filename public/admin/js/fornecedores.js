@@ -3,531 +3,323 @@
 // public/admin/js/fornecedores.js
 // ======================================================
 
+if (!window.fornecedoresModuloCarregado) {
+
+window.fornecedoresModuloCarregado = true;
 
 let supplierModal = null;
 
-
-// iniciar módulo
+// =====================================
+// INICIAR
+// =====================================
 
 iniciarFornecedores();
 
-
-
-async function iniciarFornecedores(){
-
+async function iniciarFornecedores() {
 
     configurarModalFornecedor();
 
-
     configurarEventosFornecedor();
-
 
     await carregarFornecedores();
 
-
-    console.log(
-        "✅ Módulo de Fornecedores carregado."
-    );
-
+    console.log("✅ Módulo de fornecedores carregado.");
 
 }
 
+// =====================================
+// MODAL
+// =====================================
 
+function configurarModalFornecedor() {
 
-// ======================================================
-// CONFIGURAR MODAL
-// ======================================================
+    const modal = document.getElementById("supplierModal");
 
+    if (modal) {
 
-function configurarModalFornecedor(){
-
-
-    const modal =
-        document.getElementById(
-            "supplierModal"
-        );
-
-
-    if(modal){
-
-        supplierModal =
-            new bootstrap.Modal(modal);
+        supplierModal = new bootstrap.Modal(modal);
 
     }
 
-
 }
 
-
-
-
-// ======================================================
+// =====================================
 // EVENTOS
-// ======================================================
+// =====================================
 
+function configurarEventosFornecedor() {
 
-function configurarEventosFornecedor(){
+    const btnNovo = document.getElementById("btnNovoFornecedor");
 
+    if (btnNovo) {
 
-    const btnNovo =
-        document.getElementById(
-            "btnNovoFornecedor"
-        );
+        btnNovo.addEventListener("click", () => {
 
+            limparFornecedor();
 
+            supplierModal.show();
 
-    if(btnNovo){
-
-
-        btnNovo.addEventListener(
-            "click",
-            ()=>{
-
-
-                limparFornecedor();
-
-
-                supplierModal.show();
-
-
-            }
-
-        );
-
+        });
 
     }
 
+    const btnSalvar = document.getElementById("btnSalvarFornecedor");
 
+    if (btnSalvar) {
 
-
-    const btnSalvar =
-        document.getElementById(
-            "btnSalvarFornecedor"
-        );
-
-
-
-    if(btnSalvar){
-
-
-        btnSalvar.addEventListener(
-            "click",
-            salvarFornecedor
-        );
-
+        btnSalvar.addEventListener("click", salvarFornecedor);
 
     }
-
 
 }
 
-
-
-
-// ======================================================
+// =====================================
 // LISTAR FORNECEDORES
-// ======================================================
+// =====================================
 
+async function carregarFornecedores() {
 
-async function carregarFornecedores(){
+    try {
 
+        console.log("Buscando fornecedores...");
 
-    try{
+        const response = await fetch("/api/suppliers");
 
+        const result = await response.json();
 
-        const response =
-            await fetch(
-                "/api/suppliers"
-            );
+        console.log("Resposta API:", result);
 
+        if (!result.success) {
 
-        const suppliers =
-            await response.json();
-
-
-
-        const tbody =
-            document.getElementById(
-                "suppliersTable"
-            );
-
-
-
-        if(!tbody)
-            return;
-
-
-
-        tbody.innerHTML = "";
-
-
-
-        if(suppliers.length === 0){
-
-
-            tbody.innerHTML = `
-
-                <tr>
-
-                    <td colspan="7"
-                        class="text-center">
-
-                        Nenhum fornecedor cadastrado.
-
-                    </td>
-
-                </tr>
-
-            `;
-
+            alert(result.message);
 
             return;
 
         }
 
+        const suppliers = result.suppliers || [];
 
+        const tbody = document.getElementById("suppliersTable");
 
+        if (!tbody) {
 
+            console.error("Tabela suppliersTable não encontrada.");
 
-        suppliers.forEach(supplier=>{
+            return;
 
+        }
+
+        tbody.innerHTML = "";
+
+        if (suppliers.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center">
+                        Nenhum fornecedor cadastrado.
+                    </td>
+                </tr>
+            `;
+
+            return;
+
+        }
+
+        suppliers.forEach((supplier) => {
+
+            const statusClass =
+                supplier.status === "active"
+                    ? "bg-success"
+                    : "bg-danger";
 
             tbody.innerHTML += `
-
-
                 <tr>
 
+                    <td>${supplier.id}</td>
 
-                    <td>
-                        ${supplier.id}
-                    </td>
+                    <td>${supplier.company_name}</td>
 
+                    <td>${supplier.cnpj || "-"}</td>
 
-                    <td>
-                        ${supplier.company_name}
-                    </td>
+                    <td>${supplier.contact_name || "-"}</td>
 
-
-                    <td>
-                        ${supplier.cnpj || "-"}
-                    </td>
-
-
-                    <td>
-                        ${supplier.contact_name || "-"}
-                    </td>
-
-
-                    <td>
-                        ${supplier.email}
-                    </td>
-
-
+                    <td>${supplier.email}</td>
 
                     <td>
 
-
-                        <span class="badge bg-success">
-
+                        <span class="badge ${statusClass}">
                             ${supplier.status}
-
                         </span>
 
-
                     </td>
-
-
-
 
                     <td>
 
-
                         <button
-
                             class="btn btn-danger btn-sm"
-
                             onclick="excluirFornecedor(${supplier.id})">
-
 
                             Excluir
 
-
                         </button>
-
 
                     </td>
 
-
                 </tr>
-
-
             `;
-
 
         });
 
+        console.log("Tabela carregada.");
 
+    } catch (error) {
 
-    }catch(error){
-
-
-        console.error(error);
-
+        console.error("Erro ao listar fornecedores:", error);
 
     }
 
-
 }
-
-
-
-
-
-// ======================================================
+// =====================================
 // SALVAR FORNECEDOR
-// ======================================================
+// =====================================
 
-
-async function salvarFornecedor(){
-
-
+async function salvarFornecedor() {
 
     const dados = {
 
+        company_name: document.getElementById("companyName").value.trim(),
 
-        company_name:
-            document.getElementById(
-                "companyName"
-            ).value,
+        cnpj: document.getElementById("cnpj").value.trim(),
 
+        contact_name: document.getElementById("contactName").value.trim(),
 
+        email: document.getElementById("supplierEmail").value.trim(),
 
-        cnpj:
-            document.getElementById(
-                "cnpj"
-            ).value,
+        phone: document.getElementById("phone").value.trim(),
 
-
-
-        contact_name:
-            document.getElementById(
-                "contactName"
-            ).value,
-
-
-
-        email:
-            document.getElementById(
-                "supplierEmail"
-            ).value,
-
-
-
-        phone:
-            document.getElementById(
-                "phone"
-            ).value,
-
-
-
-        password:
-            document.getElementById(
-                "password"
-            ).value
-
+        password: document.getElementById("password").value
 
     };
 
 
+    if (!dados.company_name || !dados.email || !dados.password) {
 
-
-
-    if(
-        !dados.company_name ||
-        !dados.email ||
-        !dados.password
-    ){
-
-
-        alert(
-            "Preencha empresa, email e senha."
-        );
-
+        alert("Preencha Empresa, E-mail e Senha.");
 
         return;
-
 
     }
 
 
+    try {
+
+        const response = await fetch("/api/suppliers", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify(dados)
+
+        });
 
 
+        const result = await response.json();
+
+        console.log("Cadastro fornecedor:", result);
 
 
-    try{
+        if (!response.ok || !result.success) {
 
-
-        const response =
-            await fetch(
-                "/api/suppliers",
-                {
-
-
-                    method:
-                        "POST",
-
-
-                    headers:{
-
-
-                        "Content-Type":
-                            "application/json"
-
-
-                    },
-
-
-                    body:
-                        JSON.stringify(dados)
-
-
-                }
-
-            );
-
-
-
-
-        const result =
-            await response.json();
-
-
-
-
-        if(!response.ok){
-
-
-            alert(
-                result.message
-            );
-
+            alert(result.message || "Erro ao cadastrar fornecedor.");
 
             return;
 
-
         }
 
 
-
+        alert("Fornecedor cadastrado com sucesso!");
 
         supplierModal.hide();
 
-
         limparFornecedor();
 
+        await carregarFornecedores();
 
-        carregarFornecedores();
+    } catch (error) {
 
+        console.error("Erro ao salvar fornecedor:", error);
 
-
-    }catch(error){
-
-
-        console.error(error);
-
+        alert("Erro ao salvar fornecedor.");
 
     }
 
-
 }
+// =====================================
+// EXCLUIR FORNECEDOR
+// =====================================
 
+async function excluirFornecedor(id) {
 
-
-
-
-// ======================================================
-// EXCLUIR
-// ======================================================
-
-
-async function excluirFornecedor(id){
-
-
-    if(
-        !confirm(
-            "Excluir fornecedor?"
-        )
-    )
+    if (!confirm("Deseja realmente excluir este fornecedor?")) {
         return;
+    }
 
+    try {
 
+        const response = await fetch(`/api/suppliers/${id}`, {
+            method: "DELETE"
+        });
 
+        const result = await response.json();
 
-    await fetch(
+        console.log("Excluir fornecedor:", result);
 
-        `/api/suppliers/${id}`,
+        if (!response.ok || !result.success) {
 
-        {
+            alert(result.message || "Erro ao excluir fornecedor.");
 
-            method:
-                "DELETE"
+            return;
 
         }
 
-    );
+        await carregarFornecedores();
+
+    } catch (error) {
+
+        console.error("Erro ao excluir fornecedor:", error);
+
+        alert("Erro ao excluir fornecedor.");
+
+    }
+
+}
+
+window.excluirFornecedor = excluirFornecedor;
 
 
+// =====================================
+// LIMPAR FORMULÁRIO
+// =====================================
 
-    carregarFornecedores();
+function limparFornecedor() {
 
+    document.getElementById("companyName").value = "";
+    document.getElementById("cnpj").value = "";
+    document.getElementById("contactName").value = "";
+    document.getElementById("supplierEmail").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("password").value = "";
 
 }
 
 
-
-window.excluirFornecedor =
-    excluirFornecedor;
-
-
-
-
-
-// ======================================================
-// LIMPAR FORMULÁRIO
-// ======================================================
-
-
-function limparFornecedor(){
-
-
-    document.getElementById(
-        "companyName"
-    ).value = "";
-
-
-    document.getElementById(
-        "cnpj"
-    ).value = "";
-
-
-    document.getElementById(
-        "contactName"
-    ).value = "";
-
-
-    document.getElementById(
-        "supplierEmail"
-    ).value = "";
-
-
-    document.getElementById(
-        "phone"
-    ).value = "";
-
-
-    document.getElementById(
-        "password"
-    ).value = "";
-
+// =====================================
+// FECHAMENTO DO MÓDULO
+// =====================================
 
 }
