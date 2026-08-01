@@ -207,7 +207,33 @@ async function carregarCotacoes(){
 
 
 
-function abrirCotacao(id){
+async function abrirCotacao(id){
+
+console.log("CLIQUE RESPONDER", id);
+    try{
+
+
+        await fetch(
+            "/api/supplier/quotes/" + id + "/view",
+            {
+                method:"PUT",
+                credentials:"include"
+            }
+        );
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "Erro ao marcar visualização:",
+            error
+        );
+
+
+    }
+
 
 
     window.location.href =
@@ -215,7 +241,6 @@ function abrirCotacao(id){
 
 
 }
-
 
 
 

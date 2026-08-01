@@ -96,7 +96,22 @@ console.log(
                         Prazo:
                         ${quote.deadline}
                     </p>
+                    <p>
+                     Status:
 
+                    ${
+                     quote.answered == 1
+
+                     ? "🟢 Respondida"
+
+                     : quote.viewed == 1
+
+                    ? "🔵 Visualizada"
+
+                    : "🟡 Pendente"
+    }
+
+</p>
 
                     <button
                         class="btn btn-primary"
@@ -145,6 +160,32 @@ async function abrirCotacao(id){
         "Abrindo cotação:",
         id
     );
+
+
+    try {
+
+
+        await fetch(
+            `/api/supplier/quotes/${id}/view`,
+            {
+                method:"PUT",
+                credentials:"include"
+            }
+        );
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "Erro ao marcar visualização:",
+            error
+        );
+
+
+    }
+
 
 
     window.location.href =

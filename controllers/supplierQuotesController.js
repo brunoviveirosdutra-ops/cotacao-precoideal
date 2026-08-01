@@ -44,6 +44,7 @@ export async function getSupplierQuotes(req, res) {
 
                 qs.viewed,
                 qs.answered,
+                qs.answer_date,
                 qs.created_at
 
 
@@ -283,3 +284,77 @@ export async function getSupplierQuoteItems(req, res) {
 
 
 }
+
+// ======================================================
+// MARCAR COTAÇÃO COMO VISUALIZADA
+// ======================================================
+
+export async function markQuoteViewed(req,res){
+
+    console.log("MARK VIEWED CHAMADO");
+    console.log("QUOTE ID:", req.params.id);
+    console.log("SUPPLIER:", req.session.supplier);
+
+
+    try {
+
+        const { id } = req.params;
+
+        const supplier = req.session.supplier;
+
+
+        if (!supplier) {
+
+            return res.status(401).json({
+                success:false,
+                message:"Fornecedor não autenticado."
+            });
+
+        }
+
+
+        const db = await getDatabase();
+
+
+        await db.run(
+            `
+            UPDATE quote_suppliers
+            SET viewed = 1
+            WHERE quote_id = ?
+            AND supplier_id = ?
+            `,
+            [
+                id,
+                supplier.id
+            ]
+        );
+
+
+        res.json({
+
+            success:true,
+
+            message:"Cotação marcada como visualizada."
+
+        });
+
+
+    } catch(error) {
+
+
+        console.error(error);
+
+
+        res.status(500).json({
+
+            success:false,
+
+            message:"Erro ao marcar visualização."
+
+        });
+
+
+    }
+
+};
+

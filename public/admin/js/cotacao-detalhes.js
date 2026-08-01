@@ -281,78 +281,105 @@ const totalRespondidos =
 
 function mostrarFornecedores(fornecedores){
 
-    const lista =
+
+    const tabela =
     document.getElementById(
         "listaFornecedores"
     );
 
-    console.log(
-        "Lista fornecedores:",
-        lista
-    );
 
-    if(!lista)
+    if(!tabela)
     return;
 
-    lista.innerHTML = "";
+
+    tabela.innerHTML = "";
+
 
     if(fornecedores.length === 0){
 
-        lista.innerHTML = `
 
-        <li class="list-group-item">
-            Nenhum fornecedor encontrado
-        </li>
+        tabela.innerHTML = `
+
+        <tr>
+
+            <td colspan="5">
+                Nenhum fornecedor encontrado
+            </td>
+
+        </tr>
 
         `;
+
 
         return;
 
     }
 
+
+
     fornecedores.forEach(fornecedor=>{
 
-        const respondeu =
-            fornecedor.response_status === "respondido";
 
-        lista.innerHTML += `
+        tabela.innerHTML += `
 
-        <li class="list-group-item d-flex justify-content-between align-items-center">
+        <tr>
 
-            <div>
-
+            <td>
                 <strong>
                     ${fornecedor.company_name}
                 </strong>
+            </td>
 
-                <br>
 
-                ${fornecedor.email || ""}
+            <td>
+                ${fornecedor.email || "-"}
+            </td>
 
-            </div>
 
-            <span class="badge ${
-                respondeu
-                    ? "bg-success"
-                    : "bg-warning text-dark"
-            }">
+            <td>
 
                 ${
-                    respondeu
-                        ? "✅ Respondido"
-                        : "⏳ Aguardando"
+                    fornecedor.viewed
+                    ? "👁️ Sim"
+                    : "❌ Não"
                 }
 
-            </span>
+            </td>
 
-        </li>
+
+            <td>
+
+                ${
+                    fornecedor.answered
+                    ? "✅ Sim"
+                    : "⏳ Aguardando"
+                }
+
+            </td>
+
+
+            <td>
+
+                ${
+                    fornecedor.answer_date
+                    ? formatarData(
+                        fornecedor.answer_date
+                    )
+                    : "-"
+                }
+
+            </td>
+
+
+        </tr>
 
         `;
 
+
     });
 
-}
 
+}
 // ======================================================
 // RESPOSTAS DOS FORNECEDORES
 // ======================================================

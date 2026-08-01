@@ -7,7 +7,10 @@ uploads/
 database/*.db
 database/*.sqlite
 database/*.sqlite3
+database/*.db-shm
+database/*.db-wal
 
 .vscode/
 .DS_Store
 Thumbs.db
+
