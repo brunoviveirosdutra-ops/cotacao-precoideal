@@ -1,5 +1,6 @@
 PRAGMA foreign_keys = ON;
 
+
 -- =====================================================
 -- ADMINISTRADORES
 -- =====================================================
@@ -19,6 +20,8 @@ CREATE TABLE IF NOT EXISTS admins (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 
 );
+
+
 
 -- =====================================================
 -- FORNECEDORES
@@ -42,13 +45,15 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
     status TEXT NOT NULL
         DEFAULT 'active'
-        CHECK (status IN ('active','inactive')),
+        CHECK(status IN ('active','inactive')),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 
 );
+
+
 
 -- =====================================================
 -- PRODUTOS
@@ -64,19 +69,21 @@ CREATE TABLE IF NOT EXISTS products (
 
     unit TEXT NOT NULL
         DEFAULT 'kg'
-        CHECK (unit IN ('kg','un','cx')),
+        CHECK(unit IN ('kg','un','cx')),
 
     description TEXT,
 
     status TEXT NOT NULL
         DEFAULT 'active'
-        CHECK (status IN ('active','inactive')),
+        CHECK(status IN ('active','inactive')),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 
 );
+
+
 
 -- =====================================================
 -- COTAÇÕES
@@ -94,7 +101,7 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     status TEXT NOT NULL
         DEFAULT 'open'
-        CHECK (status IN ('open','closed','cancelled')),
+        CHECK(status IN ('open','closed','cancelled')),
 
     created_by INTEGER,
 
@@ -102,10 +109,13 @@ CREATE TABLE IF NOT EXISTS quotes (
 
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (created_by)
+
+    FOREIGN KEY(created_by)
         REFERENCES admins(id)
 
 );
+
+
 
 -- =====================================================
 -- ITENS DA COTAÇÃO
@@ -119,23 +129,24 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
     product_id INTEGER NOT NULL,
 
-<<<<<<< HEAD
     quantity REAL NOT NULL
-        CHECK (quantity > 0),
-=======
-    quantity REAL NOT NULL DEFAULT 0,
->>>>>>> 301d3af6cee9f48444e63e22481ffac5feafb0f9
+        CHECK(quantity > 0),
 
-    FOREIGN KEY (quote_id)
+
+    FOREIGN KEY(quote_id)
         REFERENCES quotes(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (product_id)
+
+    FOREIGN KEY(product_id)
         REFERENCES products(id),
 
-    UNIQUE (quote_id, product_id)
+
+    UNIQUE(quote_id, product_id)
 
 );
+
+
 
 -- =====================================================
 -- FORNECEDORES DA COTAÇÃO
@@ -149,11 +160,7 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     supplier_id INTEGER NOT NULL,
 
-<<<<<<< HEAD
-    access_token TEXT UNIQUE,
 
-=======
->>>>>>> 301d3af6cee9f48444e63e22481ffac5feafb0f9
     viewed INTEGER NOT NULL DEFAULT 0,
 
     answered INTEGER NOT NULL DEFAULT 0,
@@ -162,16 +169,21 @@ CREATE TABLE IF NOT EXISTS quote_suppliers (
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (quote_id)
+
+    FOREIGN KEY(quote_id)
         REFERENCES quotes(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (supplier_id)
+
+    FOREIGN KEY(supplier_id)
         REFERENCES suppliers(id),
 
-    UNIQUE (quote_id, supplier_id)
+
+    UNIQUE(quote_id, supplier_id)
 
 );
+
+
 
 -- =====================================================
 -- RESPOSTAS DOS FORNECEDORES
@@ -185,22 +197,31 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 
     supplier_id INTEGER NOT NULL,
 
-    price REAL NOT NULL,
+
+    price REAL NOT NULL
+        CHECK(price > 0),
+
 
     observation TEXT,
 
+
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (quote_item_id)
+
+    FOREIGN KEY(quote_item_id)
         REFERENCES quote_items(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (supplier_id)
+
+    FOREIGN KEY(supplier_id)
         REFERENCES suppliers(id),
 
-    UNIQUE (quote_item_id, supplier_id)
+
+    UNIQUE(quote_item_id, supplier_id)
 
 );
+
+
 
 -- =====================================================
 -- ÍNDICES
@@ -209,38 +230,50 @@ CREATE TABLE IF NOT EXISTS supplier_answers (
 CREATE INDEX IF NOT EXISTS idx_admins_email
 ON admins(email);
 
+
 CREATE INDEX IF NOT EXISTS idx_suppliers_email
 ON suppliers(email);
+
 
 CREATE INDEX IF NOT EXISTS idx_suppliers_status
 ON suppliers(status);
 
+
 CREATE INDEX IF NOT EXISTS idx_products_name
 ON products(name);
+
 
 CREATE INDEX IF NOT EXISTS idx_products_category
 ON products(category);
 
+
 CREATE INDEX IF NOT EXISTS idx_quotes_status
 ON quotes(status);
+
 
 CREATE INDEX IF NOT EXISTS idx_quotes_deadline
 ON quotes(deadline);
 
+
 CREATE INDEX IF NOT EXISTS idx_quote_items_quote
 ON quote_items(quote_id);
+
 
 CREATE INDEX IF NOT EXISTS idx_quote_items_product
 ON quote_items(product_id);
 
+
 CREATE INDEX IF NOT EXISTS idx_quote_suppliers_quote
 ON quote_suppliers(quote_id);
+
 
 CREATE INDEX IF NOT EXISTS idx_quote_suppliers_supplier
 ON quote_suppliers(supplier_id);
 
+
 CREATE INDEX IF NOT EXISTS idx_supplier_answers_supplier
 ON supplier_answers(supplier_id);
+
 
 CREATE INDEX IF NOT EXISTS idx_supplier_answers_item
 ON supplier_answers(quote_item_id);
